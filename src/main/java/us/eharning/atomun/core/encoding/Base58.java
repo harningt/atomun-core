@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.ec.internal;
+package us.eharning.atomun.core.encoding;
 
 import static java.util.Arrays.copyOfRange;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.google.common.base.Converter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import us.eharning.atomun.core.ValidationException;
+import us.eharning.atomun.core.utility.Hash;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -30,7 +32,8 @@ import javax.annotation.Nullable;
 /**
  * Utility class to perform Base58 transformations.
  */
-final class Base58 {
+@Beta
+public final class Base58 {
     private static final Converter<byte[], String> CODEC = new ByteArrayBase58Codec();
 
     /**
@@ -86,6 +89,7 @@ final class Base58 {
      *         Base58+checksum-encoded string.
      *
      * @return bytes represented by string.
+     * @throws ValidationException if the data is too short or there is a checksum mismatch.
      */
     public static byte[] decodeWithChecksum(String base58) throws ValidationException {
         byte[] bytes = Base58.decode(base58);
