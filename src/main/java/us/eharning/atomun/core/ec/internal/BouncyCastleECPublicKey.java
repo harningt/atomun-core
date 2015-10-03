@@ -41,7 +41,7 @@ import javax.annotation.concurrent.Immutable;
  * ECKey implementation wrapping a public key using BouncyCastle.
  */
 @Immutable
-class BouncyCastleECPublicKey implements ECKey {
+public class BouncyCastleECPublicKey implements ECKey {
     protected static final SecureRandom secureRandom = new SecureRandom();
     protected static final X9ECParameters curve = SECNamedCurves.getByName("secp256k1");
     protected static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());

@@ -44,7 +44,7 @@ import javax.annotation.concurrent.Immutable;
  * ECKey implementation wrapping a full keypair using BouncyCastle.
  */
 @Immutable
-class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
+public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     @Nonnull
     private final BigInteger privateExponent;
 
