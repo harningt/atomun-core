@@ -30,6 +30,7 @@ import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
 import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.ec.ECKey;
+import us.eharning.atomun.core.utility.Hash;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

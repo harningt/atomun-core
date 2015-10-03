@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.ec.internal;
+package us.eharning.atomun.core.utility;
 
+import com.google.common.annotations.Beta;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 
 import java.security.MessageDigest;
@@ -24,7 +25,14 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Utility class to perform specific necessary hash functions.
  */
-class Hash {
+@Beta
+public final class Hash {
+    /**
+     * Prevent construction as this is a static utility class.
+     */
+    private Hash() {
+    }
+
     /**
      * Perform the double-hash of the encoded public key per Bitcoin rules.
      *

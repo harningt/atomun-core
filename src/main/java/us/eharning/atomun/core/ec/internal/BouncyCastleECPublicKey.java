@@ -27,6 +27,7 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.signers.ECDSASigner;
 import us.eharning.atomun.core.ec.ECKey;
+import us.eharning.atomun.core.utility.Hash;
 
 import java.io.IOException;
 import java.math.BigInteger;
