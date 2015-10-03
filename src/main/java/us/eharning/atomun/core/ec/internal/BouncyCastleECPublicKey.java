@@ -27,6 +27,7 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.signers.ECDSASigner;
 import us.eharning.atomun.core.ec.ECKey;
+import us.eharning.atomun.core.utility.Hash;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -40,7 +41,7 @@ import javax.annotation.concurrent.Immutable;
  * ECKey implementation wrapping a public key using BouncyCastle.
  */
 @Immutable
-class BouncyCastleECPublicKey implements ECKey {
+public class BouncyCastleECPublicKey implements ECKey {
     protected static final SecureRandom secureRandom = new SecureRandom();
     protected static final X9ECParameters curve = SECNamedCurves.getByName("secp256k1");
     protected static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());

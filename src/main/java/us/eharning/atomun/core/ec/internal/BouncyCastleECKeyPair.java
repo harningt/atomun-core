@@ -30,6 +30,8 @@ import org.bouncycastle.crypto.signers.ECDSASigner;
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
 import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.ec.ECKey;
+import us.eharning.atomun.core.encoding.Base58;
+import us.eharning.atomun.core.utility.Hash;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,7 +44,7 @@ import javax.annotation.concurrent.Immutable;
  * ECKey implementation wrapping a full keypair using BouncyCastle.
  */
 @Immutable
-class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
+public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     @Nonnull
     private final BigInteger privateExponent;
 
