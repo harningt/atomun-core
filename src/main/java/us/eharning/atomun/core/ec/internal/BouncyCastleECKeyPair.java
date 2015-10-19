@@ -165,12 +165,34 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
         }
     }
 
+    /**
+     * Parse a key in WIF base64-encoded form.
+     *
+     * @param serialized
+     *         base64-encoded WIF-encoded EC key
+     *
+     * @return decoded key
+     *
+     * @throws ValidationException
+     *         if the key is invalid.
+     */
     @Nonnull
     public static BouncyCastleECKeyPair parseWIF(@Nonnull String serialized) throws ValidationException {
         byte[] store = Base58.decode(serialized);
         return parseBytesWIF(store);
     }
 
+    /**
+     * Parse a key in WIF byte-data form.
+     *
+     * @param store
+     *         WIF-encoded EC key
+     *
+     * @return decoded key
+     *
+     * @throws ValidationException
+     *         if the key is invalid.
+     */
     @Nonnull
     public static BouncyCastleECKeyPair parseBytesWIF(@Nonnull byte[] store) throws ValidationException {
         if (store.length == 37) {
