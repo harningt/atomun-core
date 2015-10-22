@@ -271,6 +271,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     @Nonnull
     @Override
     public byte[] sign(@Nonnull byte[] hash) {
+        /* The HMacDSAKCalculator is what makes this signer RFC 6979 compliant. */
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
         signer.init(true, new ECPrivateKeyParameters(privateExponent, domain));
         BigInteger[] signature = signer.generateSignature(hash);
