@@ -16,6 +16,7 @@
 
 package us.eharning.atomun.core.ec;
 
+import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.ec.internal.BouncyCastleECKeyPair;
 import us.eharning.atomun.core.ec.internal.BouncyCastleECPublicKey;
 
@@ -35,6 +36,10 @@ public class ECKeyFactory {
 
     public static ECKeyFactory getInstance() {
         return INSTANCE;
+    }
+
+    public ECKey fromWIF(String wif) throws ValidationException {
+        return BouncyCastleECKeyPair.parseWIF(wif);
     }
 
     public ECKey generateRandom(boolean compressed) {

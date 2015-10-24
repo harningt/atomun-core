@@ -1,0 +1,166 @@
+# Credit Bits of Proof Java test case: https://github.com/bitsofproof/bop-bitcoin-client/blob/6f2dac19e6185f841a619b5f84144838fa18cb09/api/src/test/resources/RFC6979.json
+---
+# NOTE: It seems quite odd to send a raw hash through the signature operation
+# but that is exactly what these are doing... no signing a digest.
+source: Bits of Proof
+canonicalize: false
+cases:
+  -
+    wif: L24GFtCcK6E8dUNGkRK7iCUcfi3JJmVQq8NPG9LzcXS594YkuFoK
+    hashRaw: Satoshi Nakamoto
+    expectedSignature: 304502202eb53dd34d8c0014371ddf3c57b60cbdde5c525abd6384b6453192fac9ec180a022100fe5b29c65d400d7e48a0f9e3e450069fa87400288e78e1e9932ad44f6c03f23f
+  -
+    wif: L1MuyFhSGEJYXZWHRLt2Ggnou5BzCMy7165eFTB2qPPU93B4fRjV
+    hashRaw: The Times 03/Jan/2009 Chancellor on brink of second bailout for banks
+    expectedSignature: 30460221009d4adeca74eaea3a81f0c55c54478f6d5c652196b4d7c02d69bbf30504d9e95b02210080bc27ba00a4c75919b477b2a61d56de851a521d2ff6782b631c542e76e7d346
+  -
+    wif: KxiYEU4ti9G4pLb832rrjGnkvHpAt8Dqx7ZBq3NA66pQN3hpRFSx
+    hashRaw: Satoshi Nakamoto
+    expectedSignature: 304402203db5f02f6d96090852a31d16e44077a4ee879402a01bb9019238ec5269b976010220558817ff1534dc47f21b766fc014369158e4a471ae42b986eaaf659f81abe3ee
+  -
+    wif: L3wadShuDYpTR1sHVsbPSE695YX1Fh5wfDvE4ztZtyyYjidSUJmX
+    hashRaw: The Times 03/Jan/2009 Chancellor on brink of second bailout for banks
+    expectedSignature: 30450220290a41120f7d06d86d4d6914ea718d91111e58700b28072a951e59a2a8b1f983022100dee6880df00d72bc847929219a85d4edad83bd2ac45907371af920f3cac20bd7
+# Credit Haskoin
+---
+source: Haskoin
+canonicalize: true
+cases:
+  -
+    secexp: 0x0000000000000000000000000000000000000000000000000000000000000001
+    wif: KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn
+    message: Everything should be made as simple as possible, but not simpler.
+    rsHex: 33a69cd2065432a30f3d1ce4eb0d59b8ab58c74f27c41a7fdb5696ad4e6108c96f807982866f785d3f6418d24163ddae117b7db4d5fdf0071de069fa54342262
+    expectedSignature: 3044022033a69cd2065432a30f3d1ce4eb0d59b8ab58c74f27c41a7fdb5696ad4e6108c902206f807982866f785d3f6418d24163ddae117b7db4d5fdf0071de069fa54342262
+  -
+    secexp: 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140
+    wif: L5oLkpV3aqBjhki6LmvChTCV6odsp4SXM6FfU2Gppt5kFLaHLuZ9
+    message: Equations are more important to me, because politics is for the present, but an equation is something for eternity.
+    rsHex: 54c4a33c6423d689378f160a7ff8b61330444abb58fb470f96ea16d99d4a2fed07082304410efa6b2943111b6a4e0aaa7b7db55a07e9861d1fb3cb1f421044a5
+    expectedSignature: 3044022054c4a33c6423d689378f160a7ff8b61330444abb58fb470f96ea16d99d4a2fed022007082304410efa6b2943111b6a4e0aaa7b7db55a07e9861d1fb3cb1f421044a5
+  -
+    secexp: 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140
+    wif: L5oLkpV3aqBjhki6LmvChTCV6odsp4SXM6FfU2Gppt5kFLaHLuZ9
+    message: Not only is the Universe stranger than we think, it is stranger than we can think.
+    rsHex: ff466a9f1b7b273e2f4c3ffe032eb2e814121ed18ef84665d0f515360dab3dd06fc95f5132e5ecfdc8e5e6e616cc77151455d46ed48f5589b7db7771a332b283
+    expectedSignature: 3045022100ff466a9f1b7b273e2f4c3ffe032eb2e814121ed18ef84665d0f515360dab3dd002206fc95f5132e5ecfdc8e5e6e616cc77151455d46ed48f5589b7db7771a332b283
+  -
+    secexp: 0x0000000000000000000000000000000000000000000000000000000000000001
+    wif: KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn
+    message: How wonderful that we have met with a paradox. Now we have some hope of making progress.
+    rsHex: c0dafec8251f1d5010289d210232220b03202cba34ec11fec58b3e93a85b91d375afdc06b7d6322a590955bf264e7aaa155847f614d80078a90292fe205064d3
+    expectedSignature: 3045022100c0dafec8251f1d5010289d210232220b03202cba34ec11fec58b3e93a85b91d3022075afdc06b7d6322a590955bf264e7aaa155847f614d80078a90292fe205064d3
+  -
+    secexp: 0x69ec59eaa1f4f2e36b639716b7c30ca86d9a5375c7b38d8918bd9c0ebc80ba64
+    wif: KzmcSTRmg8Gtoq8jbBCwsrvgiTKRrewQXniAHHTf7hsten8MZmBB
+    message: Computer science is no more about computers than astronomy is about telescopes.
+    rsHex: 7186363571d65e084e7f02b0b77c3ec44fb1b257dee26274c38c928986fea45d0de0b38e06807e46bda1f1e293f4f6323e854c86d58abdd00c46c16441085df6
+    expectedSignature: 304402207186363571d65e084e7f02b0b77c3ec44fb1b257dee26274c38c928986fea45d02200de0b38e06807e46bda1f1e293f4f6323e854c86d58abdd00c46c16441085df6
+  -
+    secexp: 0x00000000000000000000000000007246174ab1e92e9149c6e446fe194d072637
+    wif: KwDiBf89QgGbjEhKnhXJwe1E2mCa8asowBrSKuCaBV6EsPYEAFZ8
+    message: ...if you aren't, at any given time, scandalized by code you wrote five or even three years ago, you're not learning anywhere near enough
+    rsHex: fbfe5076a15860ba8ed00e75e9bd22e05d230f02a936b653eb55b61c99dda4870e68880ebb0050fe4312b1b1eb0899e1b82da89baa5b895f612619edf34cbd37
+    expectedSignature: 3045022100fbfe5076a15860ba8ed00e75e9bd22e05d230f02a936b653eb55b61c99dda48702200e68880ebb0050fe4312b1b1eb0899e1b82da89baa5b895f612619edf34cbd37
+  -
+    secexp: 0x000000000000000000000000000000000000000000056916d0f9b31dc9b637f3
+    wif: KwDiBf89QgGbjEhKnhXJuH7LrciVrZiib5S9h4knkymNojPUVsWN
+    message: The question of whether computers can think is like the question of whether submarines can swim.
+    rsHex: cde1302d83f8dd835d89aef803c74a119f561fbaef3eb9129e45f30de86abbf906ce643f5049ee1f27890467b77a6a8e11ec4661cc38cd8badf90115fbd03cef
+    expectedSignature: 3045022100cde1302d83f8dd835d89aef803c74a119f561fbaef3eb9129e45f30de86abbf9022006ce643f5049ee1f27890467b77a6a8e11ec4661cc38cd8badf90115fbd03cef
+  -
+    secexp: 0xe91671c46231f833a6406ccbea0e3e392c76c167bac1cb013f6f1013980455c2
+    message: "There is a computer disease that anybody who works with computers knows about. It's a very serious disease and it interferes completely with the work. The trouble with computers is that you 'play' with them!"
+    expectedK: 0x1F4B84C23A86A221D233F2521BE018D9318639D5B8BBD6374A8A59232D16AD3D
+    rxHex: b552edd27580141f3b2a5463048cb7cd3e047b97c9f98076c32dbdf85a68718b279fa72dd19bfae05577e06c7c0c1900c371fcd5893f7e1d56a37d30174671f6
+    expectedSignature: 3045022100b552edd27580141f3b2a5463048cb7cd3e047b97c9f98076c32dbdf85a68718b0220279fa72dd19bfae05577e06c7c0c1900c371fcd5893f7e1d56a37d30174671f6
+
+---
+# Credit python-ecc test case: https://github.com/warner/python-ecdsa/blob/6d1fe95a0e6ae347da024d369607bd392c9a105c/ecdsa/test_pyecdsa.py
+# Also pulled in some others
+source: python-ecdsa and others
+canonicalize: true
+cases:
+  - # test_SECP256k1_1 - with derived signature after testing
+    secexp: 9d0219792467d7d37b4d43298a7d0c05
+    message: sample
+    expectedK: 0x8fa1f95d514760e498f28957b824ee6ec39ed64826ff4fecc2b5739ec45b91cd
+    expectedSignature: 30440220199eb60d223844856dae58327e24f0672c11de488e22a358fdb768175e30d9030220145f3a3d438672006470e5eb60e055031525488433a25d1d13921702ee4ebc1f
+    canonicalize: true
+  - # test_SECP256k1_2 - with signature derived and verified via btcd tests
+    secexp: 0xcca9fbcc1b41e5a95d369eaa6ddcff73b61a4efaa279cfc6567e8daa39cbaf50
+    message: sample
+    expectedK: 0x2df40ca70e639d89528a6b670d9d48d9165fdc0febc0974056bdce192b8e16a3
+    expectedSignature: 3045022100af340daf02cc15c8d5d08d7735dfe6b98a474ed373bdb5fbecf7571be52b384202205009fb27f37034a9b24b707b7c6b79ca23ddef9e25f7282e8a797efe53a8f124
+  - # test_SECP256k1_3 - with signature derived and verified via btcd tests
+    secexp: 0x1
+    message: Satoshi Nakamoto
+    expectedK: 0x8F8A276C19F4149656B280621E358CCE24F5F52542772691EE69063B74F15D15
+    rsHex: 934b1ea10a4b3c1757e2b0c017d0b6143ce3c9a7e6a4a49860d7a6ab210ee3d82442ce9d2b916064108014783e923ec36b49743e2ffa1c4496f01a512aafd9e5
+    expectedSignature: 3045022100934b1ea10a4b3c1757e2b0c017d0b6143ce3c9a7e6a4a49860d7a6ab210ee3d802202442ce9d2b916064108014783e923ec36b49743e2ffa1c4496f01a512aafd9e5
+  - # test_SECP256k1_4 - with signature derived and verified via btcd tests
+    secexp: 0x1
+    message: All those moments will be lost in time, like tears in rain. Time to die...
+    expectedK: 0x38AA22D72376B4DBC472E06C3BA403EE0A394DA63FC58D88686C611ABA98D6B3
+    expectedSignature: 30450221008600dbd41e348fe5c9465ab92d23e3db8b98b873beecd930736488696438cb6b0220547fe64427496db33bf66019dacbf0039c04199abb0122918601db38a72cfc21
+  - # test_SECP256k1_5 - with signature derived and verified via btcd tests
+    secexp: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+    message: Satoshi Nakamoto
+    expectedK: 0x33A19B60E25FB6F4435AF53A3D42D493644827367E6453928554F43E49AA6F90
+    rsHex: fd567d121db66e382991534ada77a6bd3106f0a1098c231e47993447cd6af2d094c632f14e4379fc1ea610a3df5a375152549736425ee17cebe10abbc2a2826c
+    expectedSignature: 3045022100fd567d121db66e382991534ada77a6bd3106f0a1098c231e47993447cd6af2d002206b39cd0eb1bc8603e159ef5c20a5c8ad685a45b06ce9bebed3f153d10d93bed5
+    canonicalize: true
+  - # test_SECP256k1_5 - with signature derived locally for a canonicalization example
+    secexp: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+    message: Satoshi Nakamoto
+    expectedK: 0x33A19B60E25FB6F4435AF53A3D42D493644827367E6453928554F43E49AA6F90
+    rsHex: fd567d121db66e382991534ada77a6bd3106f0a1098c231e47993447cd6af2d094c632f14e4379fc1ea610a3df5a375152549736425ee17cebe10abbc2a2826c
+    canonicalize: false
+  - # test_SECP256k1_6 - with signature derived locally for a canonicalization example
+    secexp: 0xf8b8af8ce3c7cca5e300d33939540c10d45ce001b8f252bfbc57ba0342904181
+    message: Alan Turing
+    expectedK: 0x525A82B70E67874398067543FD84C83D30C175FDC45FDEEE082FE13B1D7CFDF1
+    rsHex: 7063ae83e7f62bbb171798131b4a0564b956930092b33b07b395615d9ec7e15ca72033e1ff5ca1ea8d0c99001cb45f0272d3be7525d3049c0d9e98dc7582b857
+    canonicalize: false
+  - # test_SECP256k1_6 - with signature derived and verified via btcd tests
+    secexp: 0xf8b8af8ce3c7cca5e300d33939540c10d45ce001b8f252bfbc57ba0342904181
+    message: Alan Turing
+    expectedK: 0x525A82B70E67874398067543FD84C83D30C175FDC45FDEEE082FE13B1D7CFDF1
+    expectedSignature: 304402207063ae83e7f62bbb171798131b4a0564b956930092b33b07b395615d9ec7e15c022058dfcc1e00a35e1572f366ffe34ba0fc47db1e7189759b9fb233c5b05ab388ea
+    canonicalize: true
+---
+source: Bitcointalk
+canonicalize: true
+cases:
+  -
+    secexp: 0x1
+    message: Everything should be made as simple as possible, but not simpler.
+    expectedSignature: 3044022033a69cd2065432a30f3d1ce4eb0d59b8ab58c74f27c41a7fdb5696ad4e6108c902206f807982866f785d3f6418d24163ddae117b7db4d5fdf0071de069fa54342262
+---
+# See https://github.com/bitpay/bitcore/blob/9a5193d8e94b0bd5b8e7f00038e7c0b935405a03/test/crypto/ecdsa.js
+source: Bitpay
+cases:
+  -
+    secexp: 0xfee0a1f7afebf9d2a5a80c0c98a31c709681cce195cbcd06342b517970c0be1e
+    message: test data
+    expectedK: 0xfcce1de7a9bcd6b2d3defade6afa1913fb9229e3b7ddf4749b55c4848b2a196e
+---
+# Additional cases for RFC6979 implementation testing
+# - req custom derivation to handle the list of 'k' outputs
+# See: https://github.com/bitcoin/secp256k1/blob/0c6ab2ff1810afde319037010937262679ef92aa/src/tests.c
+source: libsecp256k1
+cases:
+  -
+    secexp: 0x0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f00
+    hash: 4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a00
+    expectedKList:
+      - 0x4fe29525b2086809159acdf0506efb86b0ec932c7ba44256ab321e421e67e9fb
+      - 0x2bf0fff1d3c378a22dc5de1d856522325c65b504491a0cbd01cb8f3aa67ffd4a
+      - 0xf528b410cb541f77000d7afb6c5b53c5c471eab43e466d9ac5190c39c82fd82e
+  -
+    secexp: 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    expectedKList:
+      - 0x9c236c165b82ae0cd590659e100b6bab3036e7ba8b06749baf6981e16f1a2b95
+      - 0xdf471061625bc0ea14b682feee2c9c02f235da04204c1d62a1536c6e17aed7a9
+      - 0x7597887cbd76321f32e30440679a22cf7f8d9d2eac390e581fea091ce202ba94

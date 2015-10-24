@@ -18,6 +18,7 @@ package us.eharning.atomun.core.ec.internal;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERSequenceGenerator;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -27,7 +28,6 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.signers.ECDSASigner;
-import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
 import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.ec.ECKey;
 import us.eharning.atomun.core.encoding.Base58;
@@ -45,6 +45,14 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
+    /**
+     * Canonicalization flag - default true, but can be disabled in unit tests.
+     * @TODO: Drop this in place of an alternate signing mechanism that can handle this.
+     */
+    @SuppressFBWarnings("JCIP_FIELD_ISNT_FINAL_IN_IMMUTABLE_CLASS")
+    static boolean CANONICALIZE = true;
+    private static final BigInteger HALF_CURVE_ORDER = curve.getN().shiftRight(1);
+
     @Nonnull
     private final BigInteger privateExponent;
 
@@ -149,7 +157,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
             ek[0] = (byte) 0x80;
             System.arraycopy(k, 0, ek, 1, k.length);
             ek[k.length + 1] = 0x01;
-            final byte[] hash = Hash.hash(ek);
+            final byte[] hash = Hash.doubleHash(ek);
             System.arraycopy(ek, 0, encoded, 0, ek.length);
             System.arraycopy(hash, 0, encoded, ek.length, 4);
             return encoded;
@@ -158,7 +166,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
             final byte[] ek = new byte[k.length + 1];
             ek[0] = (byte) 0x80;
             System.arraycopy(k, 0, ek, 1, k.length);
-            final byte[] hash = Hash.hash(ek);
+            final byte[] hash = Hash.doubleHash(ek);
             System.arraycopy(ek, 0, encoded, 0, ek.length);
             System.arraycopy(hash, 0, encoded, ek.length, 4);
             return encoded;
@@ -214,7 +222,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
         System.arraycopy(store, store.length - 4, checksum, 0, 4);
         byte[] ekey = new byte[store.length - 4];
         System.arraycopy(store, 0, ekey, 0, store.length - 4);
-        byte[] hash = Hash.hash(ekey);
+        byte[] hash = Hash.doubleHash(ekey);
         for (int i = 0; i < 4; ++i) {
             if (hash[i] != checksum[i]) {
                 throw new ValidationException("Checksum mismatch");
@@ -271,10 +279,16 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     @Nonnull
     @Override
     public byte[] sign(@Nonnull byte[] hash) {
-        ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
+        /* The HMacDSAKCalculator is what makes this signer RFC 6979 compliant. */
+        ECDSASigner signer = new ECDSASigner(new RFC6979KCalculator(new SHA256Digest()));
         signer.init(true, new ECPrivateKeyParameters(privateExponent, domain));
         BigInteger[] signature = signer.generateSignature(hash);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        /* Need to canonicalize signature up front ... */
+        if (CANONICALIZE && signature[1].compareTo(HALF_CURVE_ORDER) > 0) {
+            /* BOP does not do this */
+            signature[1] = curve.getN().subtract(signature[1]);
+        }
         try {
             DERSequenceGenerator seq = new DERSequenceGenerator(stream);
             seq.addObject(new ASN1Integer(signature[0]));
