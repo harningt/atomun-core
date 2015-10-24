@@ -18,6 +18,7 @@ package us.eharning.atomun.core.ec.internal;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERSequenceGenerator;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -46,7 +47,9 @@ import javax.annotation.concurrent.Immutable;
 public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     /**
      * Canonicalization flag - default true, but can be disabled in unit tests.
+     * @TODO: Drop this in place of an alternate signing mechanism that can handle this.
      */
+    @SuppressFBWarnings("JCIP_FIELD_ISNT_FINAL_IN_IMMUTABLE_CLASS")
     static boolean CANONICALIZE = true;
     private static final BigInteger HALF_CURVE_ORDER = curve.getN().shiftRight(1);
 
