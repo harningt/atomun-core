@@ -45,6 +45,12 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
+    /**
+     * Canonicalization flag - default true, but can be disabled in unit tests.
+     */
+    static boolean CANONICALIZE = true;
+    private static final BigInteger HALF_CURVE_ORDER = curve.getN().shiftRight(1);
+
     @Nonnull
     private final BigInteger privateExponent;
 
@@ -276,6 +282,11 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
         signer.init(true, new ECPrivateKeyParameters(privateExponent, domain));
         BigInteger[] signature = signer.generateSignature(hash);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        /* Need to canonicalize signature up front ... */
+        if (CANONICALIZE && signature[1].compareTo(HALF_CURVE_ORDER) > 0) {
+            /* BOP does not do this */
+            signature[1] = curve.getN().subtract(signature[1]);
+        }
         try {
             DERSequenceGenerator seq = new DERSequenceGenerator(stream);
             seq.addObject(new ASN1Integer(signature[0]));
