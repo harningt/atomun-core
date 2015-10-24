@@ -55,6 +55,40 @@ public final class Hash {
     }
 
     /**
+     * Perform a double SHA-256 hash of the given input data.
+     *
+     * @param data
+     *         byte array to process as input.
+     * @param offset
+     *         offset into the byte array.
+     * @param len
+     *         number of bytes to process from the byte array.
+     *
+     * @return SHA-256 digest of the data used.
+     */
+    public static byte[] doubleHash(byte[] data, int offset, int len) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(data, offset, len);
+            return digest.digest(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new Error("Missing SHA-256", e);
+        }
+    }
+
+    /**
+     * Perform a double SHA-256 hash of the given input data.
+     *
+     * @param data
+     *         byte array to process as input.
+     *
+     * @return SHA-256 digest of the data used.
+     */
+    public static byte[] doubleHash(byte[] data) {
+        return doubleHash(data, 0, data.length);
+    }
+
+    /**
      * Perform a SHA-256 hash of the given input data.
      *
      * @param data
@@ -70,14 +104,14 @@ public final class Hash {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             digest.update(data, offset, len);
-            return digest.digest(digest.digest());
+            return digest.digest();
         } catch (NoSuchAlgorithmException e) {
             throw new Error("Missing SHA-256", e);
         }
     }
 
     /**
-     * Perform a SHA-256 hash of the given input data.
+     * Perform a double SHA-256 hash of the given input data.
      *
      * @param data
      *         byte array to process as input.

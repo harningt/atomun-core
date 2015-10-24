@@ -149,7 +149,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
             ek[0] = (byte) 0x80;
             System.arraycopy(k, 0, ek, 1, k.length);
             ek[k.length + 1] = 0x01;
-            final byte[] hash = Hash.hash(ek);
+            final byte[] hash = Hash.doubleHash(ek);
             System.arraycopy(ek, 0, encoded, 0, ek.length);
             System.arraycopy(hash, 0, encoded, ek.length, 4);
             return encoded;
@@ -158,7 +158,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
             final byte[] ek = new byte[k.length + 1];
             ek[0] = (byte) 0x80;
             System.arraycopy(k, 0, ek, 1, k.length);
-            final byte[] hash = Hash.hash(ek);
+            final byte[] hash = Hash.doubleHash(ek);
             System.arraycopy(ek, 0, encoded, 0, ek.length);
             System.arraycopy(hash, 0, encoded, ek.length, 4);
             return encoded;
@@ -214,7 +214,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
         System.arraycopy(store, store.length - 4, checksum, 0, 4);
         byte[] ekey = new byte[store.length - 4];
         System.arraycopy(store, 0, ekey, 0, store.length - 4);
-        byte[] hash = Hash.hash(ekey);
+        byte[] hash = Hash.doubleHash(ekey);
         for (int i = 0; i < 4; ++i) {
             if (hash[i] != checksum[i]) {
                 throw new ValidationException("Checksum mismatch");

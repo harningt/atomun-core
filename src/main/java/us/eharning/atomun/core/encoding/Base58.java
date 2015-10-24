@@ -63,7 +63,7 @@ public final class Base58 {
      * @return Base58+checksum-encoded string.
      */
     public static String encodeWithChecksum(byte[] data) {
-        byte[] cs = Hash.hash(data);
+        byte[] cs = Hash.doubleHash(data);
         byte[] extended = new byte[data.length + 4];
         System.arraycopy(data, 0, extended, 0, data.length);
         System.arraycopy(cs, 0, extended, data.length, 4);
@@ -101,7 +101,7 @@ public final class Base58 {
         byte[] data = new byte[bytes.length - 4];
         System.arraycopy(bytes, 0, data, 0, bytes.length - 4);
         byte[] calculatedChecksum = new byte[4];
-        System.arraycopy(Hash.hash(data), 0, calculatedChecksum, 0, 4);
+        System.arraycopy(Hash.doubleHash(data), 0, calculatedChecksum, 0, 4);
         if (Arrays.equals(checksum, calculatedChecksum)) {
             return data;
         }
