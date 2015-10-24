@@ -27,7 +27,6 @@ import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.signers.ECDSASigner;
-import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
 import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.ec.ECKey;
 import us.eharning.atomun.core.encoding.Base58;
@@ -278,7 +277,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     @Override
     public byte[] sign(@Nonnull byte[] hash) {
         /* The HMacDSAKCalculator is what makes this signer RFC 6979 compliant. */
-        ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
+        ECDSASigner signer = new ECDSASigner(new RFC6979KCalculator(new SHA256Digest()));
         signer.init(true, new ECPrivateKeyParameters(privateExponent, domain));
         BigInteger[] signature = signer.generateSignature(hash);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
