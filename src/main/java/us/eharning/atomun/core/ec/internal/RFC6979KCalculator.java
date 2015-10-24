@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2000 - 2015 The Legion of the Bouncy Castle Inc. (http://www.bouncycastle.org)
+ * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +22,11 @@
  *
  * Changes:
  *  * 2015-10-24 cloned https://github.com/bcgit/bc-java/blob/930773cd7096a9c033aea87e725cf51864f3131d/core/src/main/java/org/bouncycastle/crypto/signers/HMacDSAKCalculator.java
+ *  * 2015-10-24 Thomas Harning Jr. <harningt@gmail.com>
+ *      - Added copyright notice to header
+ *      - nextK altered to return successive legal values per RFC6979
+ *        such as for the case where the K value is not legal for other
+ *        reasons that it is not within the curve.
  */
 
 package us.eharning.atomun.core.ec.internal;
@@ -53,6 +59,7 @@ public class RFC6979KCalculator
 
     private BigInteger n;
 
+    private boolean isRetry = false;
     /**
      * Base constructor.
      *
@@ -135,6 +142,19 @@ public class RFC6979KCalculator
 
         for (;;)
         {
+            if (isRetry) {
+                hMac.update(V, 0, V.length);
+                hMac.update((byte)0x00);
+
+                hMac.doFinal(K, 0);
+
+                hMac.init(new KeyParameter(K));
+
+                hMac.update(V, 0, V.length);
+
+                hMac.doFinal(V, 0);
+            }
+
             int tOff = 0;
 
             while (tOff < t.length)
@@ -150,21 +170,12 @@ public class RFC6979KCalculator
 
             BigInteger k = bitsToInt(t);
 
+            /* After the first iteration - it is aways a retry */
+            isRetry = true;
             if (k.compareTo(ZERO) > 0 && k.compareTo(n) < 0)
             {
                 return k;
             }
-
-            hMac.update(V, 0, V.length);
-            hMac.update((byte)0x00);
-
-            hMac.doFinal(K, 0);
-
-            hMac.init(new KeyParameter(K));
-
-            hMac.update(V, 0, V.length);
-
-            hMac.doFinal(V, 0);
         }
     }
 
