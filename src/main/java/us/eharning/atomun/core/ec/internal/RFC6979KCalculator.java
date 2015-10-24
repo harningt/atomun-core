@@ -27,6 +27,8 @@
  *      - nextK altered to return successive legal values per RFC6979
  *        such as for the case where the K value is not legal for other
  *        reasons that it is not within the curve.
+ *      - Disabled CHECKSTYLE due to stylistic differences that would break
+ *        simple change merging
  */
 
 package us.eharning.atomun.core.ec.internal;
@@ -45,6 +47,7 @@ import org.bouncycastle.util.BigIntegers;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+// CHECKSTYLE:OFF
 /**
  * A deterministic K calculator based on the algorithm in section 3.2 of RFC 6979.
  */
