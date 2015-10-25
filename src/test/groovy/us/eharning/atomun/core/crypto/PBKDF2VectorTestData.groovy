@@ -18,99 +18,60 @@ package us.eharning.atomun.core.crypto
 
 import com.google.common.base.Charsets
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.Iterables
-import groovy.json.StringEscapeUtils
 import groovy.transform.AutoClone
+import groovy.transform.Canonical
+import org.yaml.snakeyaml.Yaml
 
 /**
  * Container for common PBKDF2 vector test data.
  */
 class PBKDF2VectorTestData {
+    @Canonical
     @AutoClone
-    static class PBKDF2VectorTestCase {
-        String algorithm;
-        byte[] password;
-        byte[] salt;
+    static class TestCase {
+        String alg;
+        String password;
+
+        String salt;
 
         int c;
         int dkLen;
         byte[] dk;
+        public void setDK(String dk) {
+            this.dk = dk.replace(" ", "").decodeHex();
+        }
         boolean slow;
+
+        byte[] getPasswordBytes() {
+            return password.getBytes(Charsets.UTF_8)
+        }
+        byte[] getSaltBytes() {
+            return salt.getBytes(Charsets.UTF_8)
+        }
     }
 
-    public static final Iterable<PBKDF2VectorTestCase> EDGE_CASES;
-    public static final Iterable<PBKDF2VectorTestCase> HMAC_SHA1_CASES;
-    public static final Iterable<PBKDF2VectorTestCase> HMAC_SHA256_CASES;
-    public static final Iterable<PBKDF2VectorTestCase> HMAC_SHA512_CASES;
-    public static final Iterable<PBKDF2VectorTestCase> ALL_CASES;
+    public static final Iterable<TestCase> ALL_CASES;
 
     static {
-        EDGE_CASES = parseResource("us/eharning/atomun/core/crypto/pbkdf2-edge-cases.txt")
-        HMAC_SHA1_CASES = parseResource("us/eharning/atomun/core/crypto/rfc6070-cases.txt")
-        HMAC_SHA256_CASES = parseResource("us/eharning/atomun/core/crypto/rfc6070-based-HMAC-SHA256-cases.txt")
-        HMAC_SHA512_CASES = parseResource("us/eharning/atomun/core/crypto/rfc6070-based-HMAC-SHA512-cases.txt")
-        ALL_CASES = Iterables.concat(
-                EDGE_CASES,
-                HMAC_SHA1_CASES,
-                HMAC_SHA256_CASES,
-                HMAC_SHA512_CASES
-        )
+        ALL_CASES = parseYamlResource("us/eharning/atomun/core/crypto/rfc6070-cases.yaml")
     }
 
-    static Iterable<PBKDF2VectorTestCase> parseResource(String resourceName) {
-        List<PBKDF2VectorTestCase> cases = new ArrayList<>()
-
-        PBKDF2VectorTestCase builder = new PBKDF2VectorTestCase()
-        PBKDF2VectorTestData.class.classLoader.getResourceAsStream(resourceName).withReader("UTF-8", { reader ->
-            reader.eachLine { line ->
-                if (line.empty) {
-                    return
-                }
-                def (name, value) = line.split(" *= *")
-                name = name.toLowerCase()
-                switch (name) {
-                case "p":
-                case "s":
-                case "dk":
-                    def finder = value =~ /^"(.+)"$/
-                    if (finder) {
-                        value = StringEscapeUtils.unescapeJava(finder[0][1])
-                        value = value.getBytes(Charsets.UTF_8)
-                    } else {
-                        /* Byte string */
-                        value = value.replace(" ", "").decodeHex()
-                    }
-                }
-                switch (name) {
-                case "alg":
-                    builder.algorithm = value
-                    break
-                case "p":
-                    builder.password = value
-                    break
-                case "s":
-                    builder.salt = value
-                    break
-                case "c":
-                    builder.c = Integer.parseInt(value)
-                    break
-                case "dklen":
-                    builder.dkLen = Integer.parseInt(value)
-                    break
-                case "slow":
-                    builder.slow = Boolean.parseBoolean(value)
-                    break
-                case "dk":
-                    builder.dk = value
-                    assert(builder.dkLen == builder.dk.length)
-                    /* Also marks end of builder */
-                    cases.add(builder.clone())
-                    /* Resets slow marker */
-                    builder.slow = false
-                    break
-                }
+    static List<TestCase> parseYamlResource(String resourceName) {
+        Yaml yaml = new Yaml()
+        ImmutableList.Builder<TestCase> caseBuilder = ImmutableList.builder();
+        yaml.loadAll(PBKDF2VectorTestData.class.classLoader.getResourceAsStream(resourceName)).each {
+            String alg = it.alg
+            if (it.skip) {
+                return
             }
-        })
-        return ImmutableList.copyOf(cases);
+            it.cases.each {
+                TestCase testCase = it as TestCase
+                if (!testCase.alg) {
+                    testCase.alg = alg
+                }
+                caseBuilder.add(testCase)
+            }
+        }
+        return caseBuilder.build()
     }
 }

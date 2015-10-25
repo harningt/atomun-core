@@ -20,7 +20,7 @@ import com.google.common.collect.Iterables
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
-import us.eharning.atomun.core.crypto.PBKDF2VectorTestData.PBKDF2VectorTestCase
+import us.eharning.atomun.core.crypto.PBKDF2VectorTestData.TestCase
 
 /**
  * Unit tests based on test vectors for PBKDF2.
@@ -33,9 +33,9 @@ import us.eharning.atomun.core.crypto.PBKDF2VectorTestData.PBKDF2VectorTestCase
  */
 class PBKDF2VectorTestSpecification extends Specification {
     @Unroll
-    def 'FAST PBKDF2 with #param.algorithm, password #param.password, salt #param.salt, iterations #param.c, and outputLength #param.dkLen'(PBKDF2VectorTestCase param) {
+    def 'FAST PBKDF2 with #param.alg, password #param.password, salt #param.salt, iterations #param.c, and outputLength #param.dkLen'(TestCase param) {
         given:
-        def dk = PBKDF2.pbkdf2(param.algorithm, param.password, param.salt, param.c, param.dkLen)
+        def dk = PBKDF2.pbkdf2(param.alg, param.passwordBytes, param.saltBytes, param.c, param.dkLen)
         expect:
         dk.encodeHex().toString() == param.dk.encodeHex().toString()
         where:
@@ -45,9 +45,9 @@ class PBKDF2VectorTestSpecification extends Specification {
     }
     @Ignore
     @Unroll
-    def 'SLOW PBKDF2 with #param.algorithm, password #param.password, salt #param.salt, iterations #param.c, and outputLength #param.dkLen'(PBKDF2VectorTestCase param) {
+    def 'SLOW PBKDF2 with #param.alg, password #param.password, salt #param.salt, iterations #param.c, and outputLength #param.dkLen'(TestCase param) {
         given:
-        def dk = PBKDF2.pbkdf2(param.algorithm, param.password, param.salt, param.c, param.dkLen)
+        def dk = PBKDF2.pbkdf2(param.alg, param.passwordBytes, param.saltBytes, param.c, param.dkLen)
         expect:
         dk.encodeHex().toString() == param.dk.encodeHex().toString()
         where:
