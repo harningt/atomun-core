@@ -4,6 +4,8 @@
 
 [![Build Status](https://travis-ci.org/harningt/atomun-core.svg?branch=develop)](https://travis-ci.org/harningt/atomun-core)
 
+[![codecov.io](https://codecov.io/github/harningt/atomun-core/coverage.svg?branch=develop)](https://codecov.io/github/harningt/atomun-core?branch=develop)
+
 Enter [Atomun](https://github.com/harningt/atomun) - the Java Bitcoin utility library collection.
 
 This library implements the base functionality required across the various
