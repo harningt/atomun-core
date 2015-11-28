@@ -5,6 +5,9 @@ sudo: false
 jdk:
     - openjdk7
 
+env:
+    - TERM=dumb
+
 cache:
     directories:
         - $HOME/.m2
@@ -15,9 +18,10 @@ before_install:
     - pip install --user codecov
 install: ''
 script:
-    - TERM=dumb ./gradlew clean check
+    - ./gradlew clean check
 after_success:
     - test ${TRAVIS_SECURE_ENV_VARS} == true && test ${TRAVIS_BRANCH} = develop && test ${TRAVIS_PULL_REQUEST} = false && ./gradlew -P release.stage=SNAPSHOT -P sign=TRUE -P signing.secretKeyRingFile=$HOME/.gnupg/secring.gpg uploadArchives || false
+    - ./gradlew jacocoTestReport
     - codecov
 
 notifications:
