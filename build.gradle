@@ -68,6 +68,7 @@ jacoco {
 jacocoTestReport {
     reports {
         xml.enabled true
+        html.destination "${buildDir}/jacocoHtml"
     }
 }
 
