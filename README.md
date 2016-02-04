@@ -93,7 +93,7 @@ Tags will be signed by the following privately held hardware-based GPG key.
 
 ### Runtime
 
- * Guava 18.0
+ * Guava 19.0
 
 ### Test
 
