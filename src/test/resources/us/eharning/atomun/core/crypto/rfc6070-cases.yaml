@@ -1,0 +1,141 @@
+---
+alg: HmacSHA1
+cases:
+  - &simple
+    password: "password"
+    salt: "salt"
+    c: 1
+    dkLen: 20
+    DK: 0c 60 c8 0f 96 1f 0e 71 f3 a9 b5 24 af 60 12 06 2f e0 37 a6
+
+  - <<: *simple
+    c: 2
+    DK: ea 6c 01 4d c7 2d 6f 8c cd 1e d9 2a ce 1d 41 f0 d8 de 89 57
+
+  - <<: *simple
+    c: 4096
+    DK: 4b 00 79 01 b7 65 48 9a be ad 49 d9 26 f7 21 d0 65 a4 29 c1
+
+  - <<: *simple
+    slow: true
+    c: 16777216
+    DK: ee fe 3d 61 cd 4d a4 e4 e9 94 5b 3d 6b a2 15 8c 26 34 e9 84
+
+  - password: "passwordPASSWORDpassword"
+    salt: "saltSALTsaltSALTsaltSALTsaltSALTsalt"
+    c: 4096
+    dkLen: 25
+    DK: 3d 2e ec 4f e4 1c 84 9b 80 c8 d8 36 62 c0 e4 4a 8b 29 1a 96 4c f2 f0 70 38
+
+  - password: "pass\x00word"
+    salt: "sa\x00lt"
+    c: 4096
+    dkLen: 16
+    DK: 56 fa 6a a7 55 48 09 9d cc 37 d7 f0 34 25 e0 c3
+---
+alg: HmacSHA256
+cases:
+  - &simple
+    password: "password"
+    salt: "salt"
+    c: 1
+    dkLen: 20
+    DK: 12 0f b6 cf fc f8 b3 2c 43 e7 22 52 56 c4 f8 37 a8 65 48 c9
+
+  - <<: *simple
+    c: 1
+    dkLen: 32
+    DK: 12 0f b6 cf fc f8 b3 2c 43 e7 22 52 56 c4 f8 37 a8 65 48 c9 2c cc 35 48 08 05 98 7c b7 0b e1 7b
+
+  - <<: *simple
+    c: 2
+    DK: ae 4d 0c 95 af 6b 46 d3 2d 0a df f9 28 f0 6d d0 2a 30 3f 8e
+
+  - <<: *simple
+    c: 2
+    dkLen: 32
+    DK: ae 4d 0c 95 af 6b 46 d3 2d 0a df f9 28 f0 6d d0 2a 30 3f 8e f3 c2 51 df d6 e2 d8 5a 95 47 4c 43
+
+  - <<: *simple
+    c: 4096
+    DK: c5 e4 78 d5 92 88 c8 41 aa 53 0d b6 84 5c 4c 8d 96 28 93 a0
+
+  - <<: *simple
+    c: 4096
+    dkLen: 32
+    DK: c5 e4 78 d5 92 88 c8 41 aa 53 0d b6 84 5c 4c 8d 96 28 93 a0 01 ce 4e 11 a4 96 38 73 aa 98 13 4a
+
+  - <<: *simple
+    slow: true
+    c: 16777216
+    dkLen: 32
+    DK: cf 81 c6 6f e8 cf c0 4d 1f 31 ec b6 5d ab 40 89 f7 f1 79 e8 9b 3b 0b cb 17 ad 10 e3 ac 6e ba 46
+
+  - password: "passwordPASSWORDpassword"
+    salt: "saltSALTsaltSALTsaltSALTsaltSALTsalt"
+    c: 4096
+    dkLen: 25
+    DK: 34 8c 89 db cb d3 2b 2f 32 d8 14 b8 11 6e 84 cf 2b 17 34 7e bc 18 00 18 1c
+
+  - password: "passwordPASSWORDpassword"
+    salt: "saltSALTsaltSALTsaltSALTsaltSALTsalt"
+    c: 4096
+    dkLen: 40
+    DK: 34 8c 89 db cb d3 2b 2f 32 d8 14 b8 11 6e 84 cf 2b 17 34 7e bc 18 00 18 1c 4e 2a 1f b8 dd 53 e1 c6 35 51 8c 7d ac 47 e9
+
+  - password: "pass\x00word"
+    salt: "sa\x00lt"
+    c: 4096
+    dkLen: 16
+    DK: 89 b6 9d 05 16 f8 29 89 3c 69 62 26 65 0a 86 87
+---
+alg: HmacSHA512
+cases:
+  - &simple
+    password: "password"
+    salt: "salt"
+    c: 1
+    dkLen: 64
+    DK: 86 7f 70 cf 1a de 02 cf f3 75 25 99 a3 a5 3d c4 af 34 c7 a6 69 81 5a e5 d5 13 55 4e 1c 8c f2 52 c0 2d 47 0a 28 5a 05 01 ba d9 99 bf e9 43 c0 8f 05 02 35 d7 d6 8b 1d a5 5e 63 f7 3b 60 a5 7f ce
+
+  - <<: *simple
+    c: 2
+    DK: e1 d9 c1 6a a6 81 70 8a 45 f5 c7 c4 e2 15 ce b6 6e 01 1a 2e 9f 00 40 71 3f 18 ae fd b8 66 d5 3c f7 6c ab 28 68 a3 9b 9f 78 40 ed ce 4f ef 5a 82 be 67 33 5c 77 a6 06 8e 04 11 27 54 f2 7c cf 4e
+
+  - <<: *simple
+    c: 4096
+    DK: d1 97 b1 b3 3d b0 14 3e 01 8b 12 f3 d1 d1 47 9e 6c de bd cc 97 c5 c0 f8 7f 69 02 e0 72 f4 57 b5 14 3f 30 60 26 41 b3 d5 5c d3 35 98 8c b3 6b 84 37 60 60 ec d5 32 e0 39 b7 42 a2 39 43 4a f2 d5
+
+  - <<: *simple
+    c: 4096
+    dkLen: 71
+    DK: d1 97 b1 b3 3d b0 14 3e 01 8b 12 f3 d1 d1 47 9e 6c de bd cc 97 c5 c0 f8 7f 69 02 e0 72 f4 57 b5 14 3f 30 60 26 41 b3 d5 5c d3 35 98 8c b3 6b 84 37 60 60 ec d5 32 e0 39 b7 42 a2 39 43 4a f2 d5 d6 88 3f 0b e4 c2 4d
+
+  - <<: *simple
+    slow: true
+    c: 16777216
+    dkLen: 32
+    DK: 61 80 a3 ce ab ab 45 cc 39 64 11 2c 81 1e 01 31 bc a9 3a 35 d1 7e 83 3e bc 22 1a 40 bd 75 8a e8
+
+  - password: "passwordPASSWORDpassword"
+    salt: "saltSALTsaltSALTsaltSALTsaltSALTsalt"
+    c: 4096
+    dkLen: 64
+    DK: 8c 05 11 f4 c6 e5 97 c6 ac 63 15 d8 f0 36 2e 22 5f 3c 50 14 95 ba 23 b8 68 c0 05 17 4d c4 ee 71 11 5b 59 f9 e6 0c d9 53 2f a3 3e 0f 75 ae fe 30 22 5c 58 3a 18 6c d8 2b d4 da ea 97 24 a3 d3 b8
+---
+cases:
+  - &simple
+    alg: HmacSHA1
+    password: "password"
+    salt: "salt"
+    c: 1
+    dkLen: 100
+    DK: 0c60c80f961f0e71f3a9b524af6012062fe037a6e0f0eb94fe8fc46bdc637164ac2e7a8e3f9d2e83ace57e0d50e5e1071367c179bc86c767fc3f78ddb561363fc692ba406d1301e42bcccc3c520d06751d78b80c3db926b16ffa3395bd697c647f280b51
+
+  - <<: *simple
+    alg: HmacSHA256
+    DK: 120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b4dbf3a2f3dad3377264bb7b8e8330d4efc7451418617dabef683735361cdc18c22cd7fe60fa40e91c65849e1f60c0d8b62a7b2dbd0d3dfd75fb8498a5c2131ab02b66de5
+
+  - <<: *simple
+    alg: HmacSHA512
+    DK: 867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce7b532e206c2967d4c7d2ffa460539fc4d4e5eec70125d74c6c7cf86d25284f297907fcea

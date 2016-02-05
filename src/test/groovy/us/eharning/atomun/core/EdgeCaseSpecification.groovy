@@ -47,6 +47,8 @@ class EdgeCaseSpecification extends Specification {
         name | op
         "hash([])"      | { Hash.hash(new byte[0]) }
         "hash([],i,i)"  | { Hash.hash(new byte[2], 1, 1) }
+        "doubleHash([])"      | { Hash.doubleHash(new byte[0]) }
+        "doubleHash([],i,i)"  | { Hash.doubleHash(new byte[2], 1, 1) }
         "keyHash([])"   | { Hash.keyHash(new byte[0]) }
     }
 }
