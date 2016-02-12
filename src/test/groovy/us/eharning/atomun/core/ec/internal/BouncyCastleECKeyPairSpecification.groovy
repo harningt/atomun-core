@@ -73,6 +73,7 @@ class BouncyCastleECKeyPairSpecification extends Specification {
         where:
         [ i ] << ([0..20].iterator())
     }
+
     def "signature with forced failure throws - for coverage"() {
         given:
         boolean isCompressed = true
@@ -130,7 +131,6 @@ class BouncyCastleECKeyPairSpecification extends Specification {
         and: "identity works"
         EqualsTestUtil.assertEqualsImplementedCorrectly(keyPair)
         EqualsTestUtil.assertEqualsImplementedCorrectly(publicKey)
-        EqualsTestUtil.assertEqualsImplementedCorrectly(publicKey, publicKey.public)
         and: "toString of forms equal"
         keyPair.toString() == keyPair.toString()
         publicKey.toString() == publicKey.toString()
@@ -138,6 +138,60 @@ class BouncyCastleECKeyPairSpecification extends Specification {
         and: "bits are all set right"
         keyPair.hasPrivate()
         !publicKey.hasPrivate()
+        where:
+        _ | isCompressed
+        _ | false
+        _ | true
+    }
+
+    def "re-imported private keys are equivalent"(boolean isCompressed) {
+        given: "a keypair and its imported form"
+        ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
+        ECKey importedKeyPair = ECKeyFactory.getInstance().fromSecretExponent(new BigInteger(1, keyPair.exportPrivate()), isCompressed)
+        expect: "them to be equal"
+        EqualsTestUtil.assertEqualsImplementedCorrectly(keyPair, importedKeyPair)
+        where:
+        _ | isCompressed
+        _ | false
+        _ | true
+    }
+
+    def "re-imported public keys are equivalent"(boolean isCompressed) {
+        given: "a public key and its imported form"
+        ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
+        ECKey publicKey = keyPair.public
+        ECKey importedPublicKey = ECKeyFactory.getInstance().fromEncodedPublicKey(publicKey.exportPublic(), isCompressed)
+        expect: "them to be equal"
+        EqualsTestUtil.assertEqualsImplementedCorrectly(publicKey, importedPublicKey)
+        where:
+        _ | isCompressed
+        _ | false
+        _ | true
+    }
+
+    def "fresh-generated keys are not equal"(boolean isCompressed) {
+        given:
+        ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
+        ECKey publicKey = keyPair.public
+        expect: "newly generated keys not to be equal"
+        keyPair != ECKeyFactory.instance.generateRandom(true)
+        keyPair != ECKeyFactory.instance.generateRandom(false)
+        publicKey != ECKeyFactory.instance.generateRandom(true).public
+        publicKey != ECKeyFactory.instance.generateRandom(false).public
+        where:
+        _ | isCompressed
+        _ | false
+        _ | true
+    }
+
+    def "keys generated with altered key material are not equal"(boolean isCompressed) {
+        given:
+        ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
+        ECKey badImportedKeyPairPublic = ECKeyFactory.getInstance().fromSecretExponent(new BigInteger(1, keyPair.exportPrivate()), new byte[32], isCompressed)
+        ECKey badImportedKeyPairPrivate = ECKeyFactory.getInstance().fromSecretExponent(new BigInteger(1, keyPair.exportPrivate()).add(BigInteger.ONE), keyPair.exportPublic(), isCompressed)
+        expect: "private with mis-generated private != real private"
+        keyPair != badImportedKeyPairPublic
+        keyPair != badImportedKeyPairPrivate
         where:
         _ | isCompressed
         _ | false
