@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.utility.Hash;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 
@@ -106,101 +105,6 @@ public final class Base58 {
             return data;
         }
         throw new ValidationException("Checksum mismatch");
-    }
-
-    /**
-     * Utility class implementing the Base58-codec using BigIntegers.
-     */
-    @SuppressWarnings("unused")
-    @SuppressFBWarnings({"HE_INHERITS_EQUALS_USE_HASHCODE"})
-    private static class BigIntegerBase58Codec extends Converter<byte[], String> {
-        private static final char[] b58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
-        private static final int[] r58 = new int[256];
-
-        static {
-            for (int i = 0; i < 256; ++i) {
-                r58[i] = -1;
-            }
-            for (int i = 0; i < b58.length; ++i) {
-                r58[b58[i]] = i;
-            }
-        }
-
-        /**
-         * Returns a representation of {@code a} as an instance of type {@code B}. If {@code a} cannot be
-         * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
-         *
-         * @param bytes
-         *         the instance to convert; will never be null
-         *
-         * @return the converted instance; <b>must not</b> be null
-         */
-        @Override
-        protected String doForward(@Nullable byte[] bytes) {
-            assert (null != bytes);
-            if (bytes.length == 0) {
-                return "";
-            }
-            int leadingZeroes = 0;
-            while (leadingZeroes < bytes.length && bytes[leadingZeroes] == 0) {
-                ++leadingZeroes;
-            }
-            StringBuilder buffer = new StringBuilder();
-            BigInteger value = new BigInteger(1, bytes);
-            while (value.compareTo(BigInteger.ZERO) > 0) {
-                BigInteger[] result = value.divideAndRemainder(BigInteger.valueOf(58));
-                value = result[0];
-                char digit = b58[result[1].intValue()];
-                buffer.append(digit);
-            }
-            while (leadingZeroes > 0) {
-                --leadingZeroes;
-                buffer.append("1");
-            }
-            return buffer.reverse().toString();
-        }
-
-        /**
-         * Performs a reverse conversion of string-to-bytes.
-         *
-         * @param str
-         *         the instance to convert; will never be null
-         *
-         * @return the converted instance; <b>must not</b> be null
-         */
-        @Override
-        protected byte[] doBackward(@Nullable String str) {
-            assert (null != str);
-            try {
-                boolean leading = true;
-                int leadingZeroes = 0;
-                BigInteger value = BigInteger.ZERO;
-                for (char c : str.toCharArray()) {
-                    if (leading && c == '1') {
-                        ++leadingZeroes;
-                    } else {
-                        leading = false;
-                        value = value.multiply(BigInteger.valueOf(58));
-                        value = value.add(BigInteger.valueOf(r58[c]));
-                    }
-                }
-                byte[] encoded = value.toByteArray();
-                if (encoded[0] == 0) {
-                    if (leadingZeroes > 0) {
-                        --leadingZeroes;
-                    } else {
-                        byte[] encodedBytes = new byte[encoded.length - 1];
-                        System.arraycopy(encoded, 1, encodedBytes, 0, encodedBytes.length);
-                        encoded = encodedBytes;
-                    }
-                }
-                byte[] result = new byte[encoded.length + leadingZeroes];
-                System.arraycopy(encoded, 0, result, leadingZeroes, encoded.length);
-                return result;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new IllegalArgumentException("Invalid character in address");
-            }
-        }
     }
 
     /**
