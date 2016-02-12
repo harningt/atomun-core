@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.crypto.fakeProvider;
+package us.eharning.atomun.core.crypto.fakeprovider;
 
 import com.google.common.base.Throwables;
 
@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import javax.annotation.Nonnull;
 import javax.crypto.Mac;
 import javax.crypto.MacSpi;
 
@@ -29,11 +30,37 @@ import javax.crypto.MacSpi;
  * Utility to force the construction of a Mac with a given SPI.
  */
 public class MacUtility {
-    public static Mac getInstance(String algorithm, Provider provider) throws NoSuchAlgorithmException {
+    /**
+     * Utility to get a Mac instance from the named provider.
+     *
+     * @param algorithm
+     *          name of the Mac algorithm to retrieve.
+     * @param provider
+     *          service provider to retrieve instance from.
+     * @return
+     *          Mac instance wrapping the SPI.
+     * @throws NoSuchAlgorithmException if the algorithm is non-existent.
+     */
+    @Nonnull
+    public static Mac getInstance(@Nonnull String algorithm, @Nonnull Provider provider) throws NoSuchAlgorithmException {
         MacSpi spi = (MacSpi) provider.getService("Mac", algorithm).newInstance(null);
-        return getInstance(spi, provider, algorithm);
+        return getInstance(spi, algorithm, provider);
     }
-    public static Mac getInstance(MacSpi spi, Provider provider, String algorithm) {
+
+    /**
+     * Utility to construct a Mac instance as if it was from the named provider.
+     *
+     * @param spi
+     *          service provider to wrap.
+     * @param algorithm
+     *          name of the Mac algorithm to wrap.
+     * @param provider
+     *          service provider to attach to the instance.
+     * @return
+     *          Mac instance wrapping the SPI.
+     */
+    @Nonnull
+    public static Mac getInstance(@Nonnull MacSpi spi, @Nonnull String algorithm, @Nonnull Provider provider) {
         try {
             Constructor<Mac> constructor = Mac.class.getDeclaredConstructor(MacSpi.class, Provider.class, String.class);
             constructor.setAccessible(true);

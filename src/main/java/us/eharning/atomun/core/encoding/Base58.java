@@ -161,6 +161,7 @@ public final class Base58 {
          *
          * @return the converted instance; <b>must not</b> be null
          */
+        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         @Override
         protected String doForward(@Nullable byte[] input) {
             Verify.verifyNotNull(input);
@@ -204,6 +205,7 @@ public final class Base58 {
          *
          * @return the converted instance; <b>must not</b> be null
          */
+        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         @Override
         protected byte[] doBackward(@Nullable String input) {
             Verify.verifyNotNull(input);

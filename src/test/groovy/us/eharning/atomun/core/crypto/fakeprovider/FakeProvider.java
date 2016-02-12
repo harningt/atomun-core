@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.crypto.fakeProvider;
+package us.eharning.atomun.core.crypto.fakeprovider;
 
 import java.security.Provider;
 
@@ -28,6 +28,6 @@ public class FakeProvider extends Provider {
 
     public FakeProvider() {
         super(NAME, VERSION, INFO);
-        put("Mac.HmacNULL", "us.eharning.atomun.core.crypto.fakeProvider.HmacNULL");
+        put("Mac.HmacNULL", "us.eharning.atomun.core.crypto.fakeprovider.HmacNULL");
     }
 }

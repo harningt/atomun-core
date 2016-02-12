@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.crypto.fakeProvider;
+package us.eharning.atomun.core.crypto.fakeprovider;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -38,12 +38,12 @@ public class HmacNULL extends MacSpi {
     }
 
     @Override
-    protected void engineUpdate(byte b) {
+    protected void engineUpdate(byte singleByte) {
         throw new UnsupportedOperationException("HmacNULL cannot engineUpdate");
     }
 
     @Override
-    protected void engineUpdate(byte[] bytes, int i, int i1) {
+    protected void engineUpdate(byte[] bytes, int index, int length) {
         throw new UnsupportedOperationException("HmacNULL cannot engineUpdate");
     }
 

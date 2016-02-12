@@ -18,8 +18,8 @@ package us.eharning.atomun.core.crypto
 
 import net.trajano.commons.testing.UtilityClassTestUtil
 import spock.lang.Specification
-import us.eharning.atomun.core.crypto.fakeProvider.FakeProvider
-import us.eharning.atomun.core.crypto.fakeProvider.MacUtility
+import us.eharning.atomun.core.crypto.fakeprovider.FakeProvider
+import us.eharning.atomun.core.crypto.fakeprovider.MacUtility
 
 import javax.crypto.Mac
 import java.security.Provider
