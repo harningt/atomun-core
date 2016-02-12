@@ -1,3 +1,14 @@
+# Credit CryptoCoinJS samples:
+---
+source: CryptoCoinJS
+canonicalize: false
+cases:
+ -
+    wif: 5Hx15HFGyep2CfPxsJKe2fXJsCVn5DEiyoeGGF6JZjGbTRnqfiD
+    # This was generated here...
+    message: Test
+    expectedSignature: 304402206f03cd8721deb0bc8c8debf186883bd82dbd571e77cd0923d469ac1287ec2d28022067f48f1f5e36775bdb79a05ca5ffd1fefc4703e9e98db4b461025ee9a553f180
+
 # Credit Bits of Proof Java test case: https://github.com/bitsofproof/bop-bitcoin-client/blob/6f2dac19e6185f841a619b5f84144838fa18cb09/api/src/test/resources/RFC6979.json
 ---
 # NOTE: It seems quite odd to send a raw hash through the signature operation
