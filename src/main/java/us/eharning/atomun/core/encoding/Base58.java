@@ -18,6 +18,7 @@ package us.eharning.atomun.core.encoding;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Converter;
+import com.google.common.base.Verify;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.utility.Hash;
@@ -162,7 +163,7 @@ public final class Base58 {
          */
         @Override
         protected String doForward(@Nullable byte[] input) {
-            assert (null != input);
+            Verify.verifyNotNull(input);
             if (input.length == 0) {
                 return "";
             }
@@ -205,7 +206,7 @@ public final class Base58 {
          */
         @Override
         protected byte[] doBackward(@Nullable String input) {
-            assert (null != input);
+            Verify.verifyNotNull(input);
             if (input.length() == 0) {
                 return new byte[0];
             }
