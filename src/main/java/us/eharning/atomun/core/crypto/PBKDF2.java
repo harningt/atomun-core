@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2014, 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package us.eharning.atomun.core.crypto;
 import static java.lang.System.arraycopy;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 
 import java.security.GeneralSecurityException;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -31,6 +32,12 @@ import javax.crypto.spec.SecretKeySpec;
 @Beta
 @ParametersAreNonnullByDefault
 public final class PBKDF2 {
+    /**
+     * Dummy private empty constructor to prevent this from being constructed.
+     */
+    private PBKDF2() {
+    }
+
     /**
      * Implementation of PBKDF2 (RFC2898).
      *
@@ -80,9 +87,10 @@ public final class PBKDF2 {
     public static void pbkdf2(Mac mac, byte[] S, int c, byte[] DK, int dkLen) throws GeneralSecurityException {
         int hLen = mac.getMacLength();
 
-        if (dkLen > (Math.pow(2, 32) - 1) * hLen) {
-            throw new GeneralSecurityException("Requested key length too long");
-        }
+        /* Key length cannot possibly be larger than PBKDF2 limit since length type is signed int */
+        assert (!(dkLen > (Math.pow(2, 32) - 1) * hLen));
+        /* Cannot store more than dkLen in smaller array */
+        Preconditions.checkArgument(dkLen <= DK.length, "(%s) must not be greater than size of the output array (%s)", dkLen, DK.length);
 
         byte[] U = new byte[hLen];
         byte[] T = new byte[hLen];
