@@ -46,6 +46,20 @@ class RFC6979KCalculatorSpecification extends Specification {
         thrown(IllegalStateException)
     }
 
+    def "k-generation repeats if it would be zero in the iteration loop"() {
+        given: "constants that have been found to result in the first pass generating zero"
+        BigInteger q = new BigInteger(1, "06".decodeHex())
+        BigInteger x = new BigInteger(1, "0A".decodeHex())
+        byte[] hash = "AF2BDBE1AA9B6EC1E2ADE1D694F41FC71A831D0268E9891562113D8A62ADD1BF".decodeHex()
+        BigInteger expected = new BigInteger(1, "01".decodeHex())
+        RFC6979KCalculator calc = new RFC6979KCalculator(new SHA256Digest());
+        calc.init(q, x, hash)
+        BigInteger nextK = calc.nextK();
+
+        expect:
+        nextK == expected
+    }
+
     @Unroll
     def "[#iterationCount] k-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
         ECKey key = testCase.getKey()
