@@ -102,5 +102,13 @@ class Base58Specification extends Specification {
         Base58.decode('!')
         then:
         thrown(IllegalArgumentException)
+        when:
+        Base58.decode('\u00FF')
+        then:
+        thrown(IllegalArgumentException)
+        when:
+        Base58.decode('\u1FFF')
+        then:
+        thrown(IllegalArgumentException)
     }
 }
