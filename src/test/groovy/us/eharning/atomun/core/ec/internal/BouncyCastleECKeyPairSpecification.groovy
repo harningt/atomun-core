@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ class BouncyCastleECKeyPairSpecification extends Specification {
         ECKey publicKey = keyPair.public
         byte[] toSign = new byte[100];
         random.nextBytes (toSign);
-        byte[] signature = keyPair.sign (toSign);
+        byte[] signature = keyPair.ECDSA.sign(toSign);
         expect:
-        keyPair.getPublic () ==  publicKey.getPublic()
-        keyPair.getAddressHash () == publicKey.getAddressHash ()
+        keyPair.public ==  publicKey.public
+        keyPair.addressHash == publicKey.addressHash
 
-        publicKey.verify (toSign, signature)
+        publicKey.ECDSA.verify (toSign, signature)
         where:
         [ i ] << ([0..20].iterator())
     }

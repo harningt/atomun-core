@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,16 @@ package us.eharning.atomun.core.ec.internal;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.DERSequenceGenerator;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.crypto.signers.ECDSASigner;
 import us.eharning.atomun.core.ValidationException;
+import us.eharning.atomun.core.ec.ECDSA;
 import us.eharning.atomun.core.ec.ECKey;
 import us.eharning.atomun.core.encoding.Base58;
-import us.eharning.atomun.core.utility.Hash;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
@@ -45,14 +38,6 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
-    /**
-     * Canonicalization flag - default true, but can be disabled in unit tests.
-     * @TODO: Drop this in place of an alternate signing mechanism that can handle this.
-     */
-    @SuppressFBWarnings("JCIP_FIELD_ISNT_FINAL_IN_IMMUTABLE_CLASS")
-    static boolean CANONICALIZE = true;
-    private static final BigInteger HALF_CURVE_ORDER = curve.getN().shiftRight(1);
-
     @Nonnull
     private final BigInteger privateExponent;
 
@@ -65,7 +50,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
      *         whether or not to use compressed point form.
      */
     public BouncyCastleECKeyPair(@Nonnull BigInteger privateExponent, boolean compressed) {
-        this(privateExponent, curve.getG().multiply(privateExponent).getEncoded(compressed), compressed);
+        this(privateExponent, BouncyCastleECKeyConstants.CURVE.getG().multiply(privateExponent).getEncoded(compressed), compressed);
     }
 
     /**
@@ -95,7 +80,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     @Nonnull
     public static BouncyCastleECKeyPair createNew(boolean compressed) {
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
-        ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(domain, secureRandom);
+        ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(BouncyCastleECKeyConstants.DOMAIN, secureRandom);
         generator.init(keygenParams);
         AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
         ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
@@ -123,7 +108,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
         if (serializedPrivateExponent.length != 32) {
             throw new ValidationException("Invalid private key");
         }
-        return new BouncyCastleECKeyPair(new BigInteger(1, serializedPrivateExponent).mod(curve.getN()), compressed);
+        return new BouncyCastleECKeyPair(new BigInteger(1, serializedPrivateExponent).mod(BouncyCastleECKeyConstants.CURVE.getN()), compressed);
     }
 
     /**
@@ -136,7 +121,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
      */
     @Nonnull
     public static String serializeWIF(@Nonnull BouncyCastleECKeyPair key) {
-        return Base58.encode(bytesWIF(key));
+        return Base58.encodeWithChecksum(bytesWIF(key));
     }
 
     /**
@@ -152,24 +137,16 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     private static byte[] bytesWIF(@Nonnull BouncyCastleECKeyPair key) {
         byte[] k = key.exportPrivate();
         if (key.compressed) {
-            final byte[] encoded = new byte[k.length + 6];
             final byte[] ek = new byte[k.length + 2];
             ek[0] = (byte) 0x80;
             System.arraycopy(k, 0, ek, 1, k.length);
             ek[k.length + 1] = 0x01;
-            final byte[] hash = Hash.doubleHash(ek);
-            System.arraycopy(ek, 0, encoded, 0, ek.length);
-            System.arraycopy(hash, 0, encoded, ek.length, 4);
-            return encoded;
+            return ek;
         } else {
-            final byte[] encoded = new byte[k.length + 5];
             final byte[] ek = new byte[k.length + 1];
             ek[0] = (byte) 0x80;
             System.arraycopy(k, 0, ek, 1, k.length);
-            final byte[] hash = Hash.doubleHash(ek);
-            System.arraycopy(ek, 0, encoded, 0, ek.length);
-            System.arraycopy(hash, 0, encoded, ek.length, 4);
-            return encoded;
+            return ek;
         }
     }
 
@@ -186,7 +163,7 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
      */
     @Nonnull
     public static BouncyCastleECKeyPair parseWIF(@Nonnull String serialized) throws ValidationException {
-        byte[] store = Base58.decode(serialized);
+        byte[] store = Base58.decodeWithChecksum(serialized);
         return parseBytesWIF(store);
     }
 
@@ -203,31 +180,16 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
      */
     @Nonnull
     public static BouncyCastleECKeyPair parseBytesWIF(@Nonnull byte[] store) throws ValidationException {
-        if (store.length == 37) {
-            verifyChecksum(store);
-            byte[] key = new byte[store.length - 5];
-            System.arraycopy(store, 1, key, 0, store.length - 5);
+        if (store.length == 33) {
+            byte[] key = new byte[store.length - 1];
+            System.arraycopy(store, 1, key, 0, store.length - 1);
             return importSerialized(key, false);
-        } else if (store.length == 38) {
-            verifyChecksum(store);
-            byte[] key = new byte[store.length - 6];
-            System.arraycopy(store, 1, key, 0, store.length - 6);
+        } else if (store.length == 34) {
+            byte[] key = new byte[store.length - 2];
+            System.arraycopy(store, 1, key, 0, store.length - 2);
             return importSerialized(key, true);
         }
         throw new ValidationException("Invalid key length");
-    }
-
-    private static void verifyChecksum(@Nonnull byte[] store) throws ValidationException {
-        byte[] checksum = new byte[4];
-        System.arraycopy(store, store.length - 4, checksum, 0, 4);
-        byte[] ekey = new byte[store.length - 4];
-        System.arraycopy(store, 0, ekey, 0, store.length - 4);
-        byte[] hash = Hash.doubleHash(ekey);
-        for (int i = 0; i < 4; ++i) {
-            if (hash[i] != checksum[i]) {
-                throw new ValidationException("Checksum mismatch");
-            }
-        }
     }
 
     /**
@@ -269,35 +231,24 @@ public class BouncyCastleECKeyPair extends BouncyCastleECPublicKey {
     }
 
     /**
-     * Perform an ECDSA signature using the private key.
+     * Obtain a reference to the ECDSA operator for this key.
      *
-     * @param hash
-     *         byte array to sign.
-     *
-     * @return ASN.1 representation of the signature.
+     * @return instance with appropriate ECDSA capabilities.
      */
     @Nonnull
     @Override
-    public byte[] sign(@Nonnull byte[] hash) {
-        /* The HMacDSAKCalculator is what makes this signer RFC 6979 compliant. */
-        ECDSASigner signer = new ECDSASigner(new RFC6979KCalculator(new SHA256Digest()));
-        signer.init(true, new ECPrivateKeyParameters(privateExponent, domain));
-        BigInteger[] signature = signer.generateSignature(hash);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        /* Need to canonicalize signature up front ... */
-        if (CANONICALIZE && signature[1].compareTo(HALF_CURVE_ORDER) > 0) {
-            /* BOP does not do this */
-            signature[1] = curve.getN().subtract(signature[1]);
-        }
-        try {
-            DERSequenceGenerator seq = new DERSequenceGenerator(stream);
-            seq.addObject(new ASN1Integer(signature[0]));
-            seq.addObject(new ASN1Integer(signature[1]));
-            seq.close();
-            return stream.toByteArray();
-        } catch (IOException e) {
-            throw new IllegalStateException("IOException should not be thrown", e);
-        }
+    public ECDSA getECDSA() {
+        return BouncyCastleECSigner.fromPrivateKey(this);
+    }
+
+    /**
+     * Obtain an internal reference to the secret exponent.
+     *
+     * @return secret exponent.
+     */
+    @Nonnull
+    BigInteger getPrivateExponent() {
+        return privateExponent;
     }
 
     /**
