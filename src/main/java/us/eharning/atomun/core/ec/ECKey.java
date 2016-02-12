@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,25 +68,10 @@ public interface ECKey {
     ECKey getPublic();
 
     /**
-     * Perform an ECDSA signature using the private key.
+     * Obtain a reference to the ECDSA operator for this key.
      *
-     * @param hash
-     *         byte array to sign.
-     *
-     * @return ASN.1 representation of the signature.
+     * @return instance with appropriate ECDSA capabilities.
      */
     @Nonnull
-    byte[] sign(@Nonnull byte[] hash);
-
-    /**
-     * Verify an ECDSA signature using the public key.
-     *
-     * @param hash
-     *         byte array of the hash to verify.
-     * @param signature
-     *         ASN.1 representation of the signature to verify hash with.
-     *
-     * @return true if the signature matches, else false.
-     */
-    boolean verify(@Nonnull byte[] hash, @Nonnull byte[] signature);
+    ECDSA getECDSA();
 }

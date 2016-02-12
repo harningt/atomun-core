@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,10 @@ package us.eharning.atomun.core.ec.internal;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.bouncycastle.crypto.signers.ECDSASigner;
+import us.eharning.atomun.core.ec.ECDSA;
 import us.eharning.atomun.core.ec.ECKey;
 import us.eharning.atomun.core.utility.Hash;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import javax.annotation.CheckForNull;
@@ -43,8 +34,6 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class BouncyCastleECPublicKey implements ECKey {
     protected static final SecureRandom secureRandom = new SecureRandom();
-    protected static final X9ECParameters curve = SECNamedCurves.getByName("secp256k1");
-    protected static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
 
     @Nonnull
     protected final byte[] encodedPublicKey;
@@ -108,54 +97,6 @@ public class BouncyCastleECPublicKey implements ECKey {
     }
 
     /**
-     * Perform an ECDSA signature using the private key.
-     * This public key implementation outright fails because it is unsupported.
-     *
-     * @param hash
-     *         byte array to sign.
-     *
-     * @return ASN.1 representation of the signature.
-     */
-    @Nonnull
-    @Override
-    public byte[] sign(@Nonnull byte[] hash) {
-        throw new UnsupportedOperationException("Cannot sign with public key");
-    }
-
-    /**
-     * Verify an ECDSA signature using the public key.
-     *
-     * @param hash
-     *         byte array of the hash to verify.
-     * @param signature
-     *         ASN.1 representation of the signature to verify hash with.
-     *
-     * @return true if the signature matches, else false.
-     */
-    @SuppressWarnings("checkstyle:localvariablename")
-    @Override
-    public boolean verify(@Nonnull byte[] hash, @Nonnull byte[] signature) {
-        ASN1InputStream asn1 = new ASN1InputStream(signature);
-        try {
-            ECDSASigner signer = new ECDSASigner();
-            signer.init(false, new ECPublicKeyParameters(curve.getCurve().decodePoint(encodedPublicKey), domain));
-            DLSequence seq = (DLSequence) asn1.readObject();
-            BigInteger r = ((ASN1Integer) seq.getObjectAt(0)).getPositiveValue();
-            BigInteger s = ((ASN1Integer) seq.getObjectAt(1)).getPositiveValue();
-            return signer.verifySignature(hash, r, s);
-        } catch (Exception e) {
-            // treat format errors as invalid signatures
-            return false;
-        } finally {
-            try {
-                asn1.close();
-            } catch (IOException e) {
-                /* squelch */
-            }
-        }
-    }
-
-    /**
      * Obtain a reference to this key, just including public pieces.
      *
      * @return instance with just public data present.
@@ -164,6 +105,17 @@ public class BouncyCastleECPublicKey implements ECKey {
     @Override
     public ECKey getPublic() {
         return this;
+    }
+
+    /**
+     * Obtain a reference to the ECDSA operator for this key.
+     *
+     * @return instance with appropriate ECDSA capabilities.
+     */
+    @Nonnull
+    @Override
+    public ECDSA getECDSA() {
+        return BouncyCastleECSigner.fromPublicKey(this);
     }
 
     /**

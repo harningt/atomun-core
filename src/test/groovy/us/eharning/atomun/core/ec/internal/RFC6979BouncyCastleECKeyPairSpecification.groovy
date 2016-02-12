@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package us.eharning.atomun.core.ec.internal
 
-import org.bouncycastle.asn1.sec.SECNamedCurves
-import org.bouncycastle.asn1.x9.X9ECParameters
-import org.bouncycastle.crypto.params.ECDomainParameters
 import spock.lang.Specification
 import spock.lang.Unroll
 import us.eharning.atomun.core.ec.ECKey
@@ -29,21 +26,16 @@ import us.eharning.atomun.core.ec.RFC6979TestData.TestCase
  * Tests for the various ECKeyPair implementations.
  */
 class RFC6979BouncyCastleECKeyPairSpecification extends Specification {
-    protected static final X9ECParameters curve = SECNamedCurves.getByName("secp256k1");
-    protected static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
-
     @Unroll
     def "[#iterationCount] signature-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
         given:
-        /* UGLY HACK TO MANIPULATE CANONICALIZATION */
-        BouncyCastleECKeyPair.CANONICALIZE = testCase.canonicalize
         ECKey keyPair = testCase.key
         ECKey publicKey = keyPair.public
         byte[] toSign = testCase.messageHash
-        byte[] signature = keyPair.sign (toSign);
+        byte[] signature = keyPair.ECDSA.withCanonicalize(testCase.canonicalize).sign(toSign);
         expect:
 
-        publicKey.verify (toSign, signature)
+        publicKey.ECDSA.verify(toSign, signature)
         signature.encodeHex().toString() == testCase.expectedSignature
 
         where:

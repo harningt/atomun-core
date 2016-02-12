@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package us.eharning.atomun.core
 
+import net.trajano.commons.testing.UtilityClassTestUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 import us.eharning.atomun.core.utility.Hash
@@ -50,5 +51,24 @@ class EdgeCaseSpecification extends Specification {
         "doubleHash([])"      | { Hash.doubleHash(new byte[0]) }
         "doubleHash([],i,i)"  | { Hash.doubleHash(new byte[2], 1, 1) }
         "keyHash([])"   | { Hash.keyHash(new byte[0]) }
+    }
+    def 'Hash is a utility class'() {
+        when:
+        UtilityClassTestUtil.assertUtilityClassWellDefined(Hash.class)
+        then:
+        noExceptionThrown()
+    }
+    def 'validationException sanity for storage'() {
+        given:
+        def message = "Hello"
+        def cause = new Exception()
+        def withCause = new ValidationException(cause)
+        def withMessage = new ValidationException(message)
+        def withMessageCause = new ValidationException(message, cause)
+        expect:
+        withCause.cause == cause
+        withMessage.message == message
+        withMessageCause.cause == cause
+        withMessageCause.message == message
     }
 }
