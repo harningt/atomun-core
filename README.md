@@ -2,9 +2,9 @@
 
 [![License](http://img.shields.io/badge/license-Apache_2-red.svg)][Apache2.0]
 
-[![Build Status](https://travis-ci.org/harningt/atomun-core.svg?branch=develop)](https://travis-ci.org/harningt/atomun-core)
+DEVELOP [![Build Status](https://travis-ci.org/harningt/atomun-core.svg?branch=develop)](https://travis-ci.org/harningt/atomun-core) [![codecov.io](https://codecov.io/github/harningt/atomun-core/coverage.svg?branch=develop)](https://codecov.io/github/harningt/atomun-core?branch=develop)
 
-[![codecov.io](https://codecov.io/github/harningt/atomun-core/coverage.svg?branch=develop)](https://codecov.io/github/harningt/atomun-core?branch=develop)
+MASTER [![Build Status](https://travis-ci.org/harningt/atomun-core.svg?branch=master)](https://travis-ci.org/harningt/atomun-core) [![codecov.io](https://codecov.io/github/harningt/atomun-core/coverage.svg?branch=master)](https://codecov.io/github/harningt/atomun-core?branch=master)
 
 Enter [Atomun](https://github.com/harningt/atomun) - the Java Bitcoin utility library collection.
 
