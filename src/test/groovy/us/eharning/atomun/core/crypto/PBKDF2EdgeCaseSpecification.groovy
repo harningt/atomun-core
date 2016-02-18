@@ -16,6 +16,9 @@
 
 package us.eharning.atomun.core.crypto
 
+import com.google.common.hash.HashFunction
+import com.google.common.hash.Hashing
+import com.google.common.hash.NullHashFunction
 import net.trajano.commons.testing.UtilityClassTestUtil
 import spock.lang.Specification
 import us.eharning.atomun.core.crypto.fakeprovider.FakeProvider
@@ -49,6 +52,32 @@ class PBKDF2EdgeCaseSpecification extends Specification {
     def 'PBKDF2 fails if output key length > output array'() {
         given:
         def mac = Mac.getInstance("HMACSHA1")
+        byte[] EMPTY_SALT = new byte[0]
+        int iterations = 1
+        int outputLength = 1
+        byte[] output = new byte[outputLength - 1]
+        when:
+        PBKDF2.pbkdf2(mac, EMPTY_SALT, iterations, output, outputLength)
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    def 'PBKDF2 w/ HashFunction fails horribly if length requirement fails'() {
+        given:
+        HashFunction mac = new NullHashFunction()
+        byte[] EMPTY_SALT = new byte[0]
+        int iterations = 1
+        int outputLength = 1
+        byte[] output = new byte[outputLength]
+        when:
+        PBKDF2.pbkdf2(mac, EMPTY_SALT, iterations, output, outputLength)
+        then:
+        thrown(AssertionError)
+    }
+
+    def 'PBKDF2 w/ HashFunction fails if output key length > output array'() {
+        given:
+        def mac = Hashing.hmacSha1("TEST".bytes)
         byte[] EMPTY_SALT = new byte[0]
         int iterations = 1
         int outputLength = 1
