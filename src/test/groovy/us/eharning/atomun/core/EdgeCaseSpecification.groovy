@@ -29,29 +29,6 @@ import java.util.concurrent.Callable
  * Test case specification to try to hit odd edge cases.
  */
 class EdgeCaseSpecification extends Specification {
-    @Unroll
-    def "missing algorithm results in error on hash ops like #name"(String name, Callable<Void> op) {
-        given:
-        Provider[] providerBackup = Security.providers;
-        for (Provider provider : Security.providers.reverse()) {
-            Security.removeProvider(provider.getName())
-        }
-        when:
-        op()
-        then:
-        thrown(Error)
-        cleanup:
-        for (Provider provider : providerBackup) {
-            Security.addProvider(provider);
-        }
-        where:
-        name | op
-        "hash([])"      | { Hash.hash(new byte[0]) }
-        "hash([],i,i)"  | { Hash.hash(new byte[2], 1, 1) }
-        "doubleHash([])"      | { Hash.doubleHash(new byte[0]) }
-        "doubleHash([],i,i)"  | { Hash.doubleHash(new byte[2], 1, 1) }
-        "keyHash([])"   | { Hash.keyHash(new byte[0]) }
-    }
     def 'Hash is a utility class'() {
         when:
         UtilityClassTestUtil.assertUtilityClassWellDefined(Hash.class)

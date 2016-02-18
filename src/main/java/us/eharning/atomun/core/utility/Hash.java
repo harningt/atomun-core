@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package us.eharning.atomun.core.utility;
 
 import com.google.common.annotations.Beta;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 
 import java.security.MessageDigest;
@@ -43,14 +45,10 @@ public final class Hash {
      */
     public static byte[] keyHash(byte[] key) {
         byte[] ph = new byte[20];
-        try {
-            byte[] sha256 = MessageDigest.getInstance("SHA-256").digest(key);
-            RIPEMD160Digest digest = new RIPEMD160Digest();
-            digest.update(sha256, 0, sha256.length);
-            digest.doFinal(ph, 0);
-        } catch (NoSuchAlgorithmException e) {
-            throw new Error("Missing SHA-256", e);
-        }
+        byte[] sha256 = Hashing.sha256().hashBytes(key).asBytes();
+        RIPEMD160Digest digest = new RIPEMD160Digest();
+        digest.update(sha256, 0, sha256.length);
+        digest.doFinal(ph, 0);
         return ph;
     }
 
@@ -67,13 +65,8 @@ public final class Hash {
      * @return SHA-256 digest of the data used.
      */
     public static byte[] doubleHash(byte[] data, int offset, int len) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(data, offset, len);
-            return digest.digest(digest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            throw new Error("Missing SHA-256", e);
-        }
+        HashCode code = Hashing.sha256().hashBytes(data, offset, len);
+        return Hashing.sha256().hashBytes(code.asBytes()).asBytes();
     }
 
     /**
@@ -101,13 +94,7 @@ public final class Hash {
      * @return SHA-256 digest of the data used.
      */
     public static byte[] hash(byte[] data, int offset, int len) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(data, offset, len);
-            return digest.digest();
-        } catch (NoSuchAlgorithmException e) {
-            throw new Error("Missing SHA-256", e);
-        }
+        return Hashing.sha256().hashBytes(data, offset, len).asBytes();
     }
 
     /**
