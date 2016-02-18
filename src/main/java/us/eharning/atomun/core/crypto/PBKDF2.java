@@ -20,6 +20,8 @@ import static java.lang.System.arraycopy;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hasher;
 
 import java.security.GeneralSecurityException;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -114,6 +116,60 @@ public final class PBKDF2 {
             for (int j = 1; j < c; j++) {
                 mac.update(U);
                 mac.doFinal(U, 0);
+
+                for (int k = 0; k < hLen; k++) {
+                    T[k] ^= U[k];
+                }
+            }
+
+            arraycopy(T, 0, DK, (i - 1) * hLen, (i == l ? r : hLen));
+        }
+    }
+
+
+    /**
+     * Implementation of PBKDF2 (RFC2898).
+     *
+     * @param mac
+     *         Pre-initialized {@link com.google.common.hash.HashFunction} instance to use.
+     * @param S
+     *         Salt.
+     * @param c
+     *         Iteration count.
+     * @param DK
+     *         Byte array that derived key will be placed in.
+     * @param dkLen
+     *         Intended length, in octets, of the derived key.
+     */
+    @SuppressWarnings({"checkstyle:parametername", "checkstyle:localvariablename"})
+    public static void pbkdf2(HashFunction mac, byte[] S, int c, byte[] DK, int dkLen) {
+        int hLen = mac.bits() / 8;
+
+        /* Key length cannot possibly be larger than PBKDF2 limit since length type is signed int */
+        assert (!(dkLen > (Math.pow(2, 32) - 1) * hLen));
+        /* Cannot store more than dkLen in smaller array */
+        Preconditions.checkArgument(dkLen <= DK.length, "(%s) must not be greater than size of the output array (%s)", dkLen, DK.length);
+
+        byte[] U = new byte[hLen];
+        byte[] T = new byte[hLen];
+        byte[] block1 = new byte[S.length + 4];
+
+        int l = (int) Math.ceil((double) dkLen / hLen);
+        int r = dkLen - (l - 1) * hLen;
+
+        arraycopy(S, 0, block1, 0, S.length);
+
+        for (int i = 1; i <= l; i++) {
+            block1[S.length + 0] = (byte) (i >> 24 & 0xff);
+            block1[S.length + 1] = (byte) (i >> 16 & 0xff);
+            block1[S.length + 2] = (byte) (i >> 8 & 0xff);
+            block1[S.length + 3] = (byte) (i >> 0 & 0xff);
+
+            mac.hashBytes(block1).writeBytesTo(U, 0, U.length);
+            arraycopy(U, 0, T, 0, hLen);
+
+            for (int j = 1; j < c; j++) {
+                mac.hashBytes(U).writeBytesTo(U, 0, U.length);
 
                 for (int k = 0; k < hLen; k++) {
                     T[k] ^= U[k];
