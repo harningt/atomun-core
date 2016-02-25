@@ -59,8 +59,7 @@ public final class PBKDF2 {
      */
     @SuppressWarnings({"checkstyle:parametername", "checkstyle:localvariablename"})
     public static byte[] pbkdf2(String alg, byte[] P, byte[] S, int c, int dkLen) throws GeneralSecurityException {
-        Mac mac = Mac.getInstance(alg);
-        mac.init(new SecretKeySpec(P, alg));
+        OneWayProcessor mac = OneWayProcessors.getJceMac(alg, P);
         byte[] DK = new byte[dkLen];
         pbkdf2(mac, S, c, DK, dkLen);
         return DK;
@@ -85,7 +84,30 @@ public final class PBKDF2 {
      */
     @SuppressWarnings({"checkstyle:parametername", "checkstyle:localvariablename"})
     public static void pbkdf2(Mac mac, byte[] S, int c, byte[] DK, int dkLen) throws GeneralSecurityException {
-        int hLen = mac.getMacLength();
+        pbkdf2(OneWayProcessors.wrapJceMac(mac), S, c, DK, dkLen);
+    }
+
+
+    /**
+     * Implementation of PBKDF2 (RFC2898).
+     *
+     * @param mac
+     *         Pre-initialized {@link OneWayProcessor} instance to use.
+     * @param S
+     *         Salt.
+     * @param c
+     *         Iteration count.
+     * @param DK
+     *         Byte array that derived key will be placed in.
+     * @param dkLen
+     *         Intended length, in octets, of the derived key.
+     *
+     * @throws GeneralSecurityException
+     *         If key parameters are invalid.
+     */
+    @SuppressWarnings({"checkstyle:parametername", "checkstyle:localvariablename"})
+    public static void pbkdf2(OneWayProcessor mac, byte[] S, int c, byte[] DK, int dkLen) throws GeneralSecurityException {
+        int hLen = mac.getOutputLength();
 
         /* Key length cannot possibly be larger than PBKDF2 limit since length type is signed int */
         assert (!(dkLen > (Math.pow(2, 32) - 1) * hLen));
@@ -107,13 +129,13 @@ public final class PBKDF2 {
             block1[S.length + 2] = (byte) (i >> 8 & 0xff);
             block1[S.length + 3] = (byte) (i >> 0 & 0xff);
 
-            mac.update(block1);
-            mac.doFinal(U, 0);
+            mac.processBytes(block1, 0, block1.length);
+            mac.writeTo(U, 0, U.length);
             arraycopy(U, 0, T, 0, hLen);
 
             for (int j = 1; j < c; j++) {
-                mac.update(U);
-                mac.doFinal(U, 0);
+                mac.processBytes(U, 0, U.length);
+                mac.writeTo(U, 0, U.length);
 
                 for (int k = 0; k < hLen; k++) {
                     T[k] ^= U[k];
