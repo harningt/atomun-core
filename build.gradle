@@ -6,7 +6,7 @@ plugins {
     id 'maven'
     id 'org.ajoberstar.release-opinion' version '1.3.0'
     id 'org.ajoberstar.defaults' version '0.5.2'
-    id "org.standardout.versioneye" version "1.1.1"
+    id "org.standardout.versioneye" version "1.4.0"
     id 'checkstyle'
     id 'findbugs'
 }
@@ -49,8 +49,8 @@ dependencies {
 
     compile 'org.bouncycastle:bcprov-jdk15on:1.54'
 
-    testCompile 'org.codehaus.groovy:groovy:2.4.6'
-    testCompile 'cglib:cglib-nodep:3.2.1'
+    testCompile 'org.codehaus.groovy:groovy:2.4.7'
+    testCompile 'cglib:cglib-nodep:3.2.4'
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
     testCompile 'net.trajano.commons:commons-testing:2.1.0'
     testCompile 'net.trajano.caliper:caliper:1.2.1'
@@ -58,13 +58,13 @@ dependencies {
 }
 
 checkstyle {
-    /* Using checkstyle 6.15 as that is the maximum for the IntelliJ extensions */
-    toolVersion = '6.15'
+    /* Using checkstyle 7.1 as that is the maximum for the IntelliJ extensions */
+    toolVersion = '7.1'
     configFile = new File(rootDir, 'gradle/checkstyle/checkstyle.xml')
 }
 
 jacoco {
-    toolVersion = '0.7.6.201602180812'
+    toolVersion = '0.7.7.201606060606'
 }
 
 jacocoTestReport {
