@@ -1,5 +1,11 @@
 import org.ajoberstar.gradle.git.release.opinion.Strategies
 
+buildscript {
+    dependencies {
+        classpath 'net.sf.proguard:proguard-base:5.2.1'
+    }
+}
+
 plugins {
     id 'java'
     id 'groovy'
@@ -13,7 +19,7 @@ plugins {
 
 group = 'us.eharning.atomun'
 description = 'Utility library implementing core support functionality.'
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 defaults {
     id = 'harningt'
@@ -90,4 +96,17 @@ apply from: "$rootDir/gradle/maven-publish.gradle"
 
 wrapper {
     gradleVersion = '2.14.1'
+}
+
+/* Sanity check that the minimum class-set is from Java 7 */
+task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: assemble) {
+    injars project.jar.archivePath
+    libraryjars files(System.getenv("JAVA7_HOME") + "/jre/lib/rt.jar")
+    libraryjars files(System.getenv("JAVA7_HOME") + "/jre/lib/jce.jar")
+    libraryjars files(configurations.compile)
+    dontshrink
+    dontobfuscate
+    dontoptimize
+    dontnote 'javax.annotation.**'
+    dontnote 'net.jcip.annotations.**'
 }
