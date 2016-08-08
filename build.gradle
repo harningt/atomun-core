@@ -104,9 +104,13 @@ task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: assemble) {
     libraryjars files(System.getenv("JAVA7_HOME") + "/jre/lib/rt.jar")
     libraryjars files(System.getenv("JAVA7_HOME") + "/jre/lib/jce.jar")
     libraryjars files(configurations.compile)
+    // Don't really try to do anything, we just want this tool for it's bytecode lint
     dontshrink
     dontobfuscate
     dontoptimize
+    // Don't fail if LambdaMetafactory is missing - it would be handled by Retrolambda
+    dontwarn 'java.lang.invoke.LambdaMetafactory'
+    // Don't note that these are duplicately imported, different test tools pull in
     dontnote 'javax.annotation.**'
     dontnote 'net.jcip.annotations.**'
 }
