@@ -93,13 +93,23 @@ public final class Base58 {
         if (bytes.length < 4) {
             throw new ValidationException("Input string too short to contain checksum");
         }
-        byte[] checksum = new byte[4];
-        System.arraycopy(bytes, bytes.length - 4, checksum, 0, 4);
+
         byte[] data = new byte[bytes.length - 4];
-        System.arraycopy(bytes, 0, data, 0, bytes.length - 4);
-        byte[] calculatedChecksum = new byte[4];
-        System.arraycopy(Hash.INSTANCE.doubleHash(data), 0, calculatedChecksum, 0, 4);
-        if (Arrays.equals(checksum, calculatedChecksum)) {
+        /* Re-use data buffer if large enough to save digest output */
+        byte[] hash;
+        if (data.length >= 32) {
+            hash = data;
+        } else {
+            hash = new byte[32];
+        }
+        /* Generate a digest based on the content, stripping off the checksum at the end */
+        Hash.doubleHash(bytes, 0, bytes.length - 4, hash, 0, 32);
+        boolean matches = true;
+        for (int i = 0; i < 4; i++) {
+            matches &= (bytes[bytes.length - 4 + i] == hash[i]);
+        }
+        if (matches) {
+            System.arraycopy(bytes, 0, data, 0, bytes.length - 4);
             return data;
         }
         throw new ValidationException("Checksum mismatch");
@@ -212,6 +222,33 @@ public final class Base58 {
             if (input.length() == 0) {
                 return new byte[0];
             }
+            byte[] decoded = new byte[input.length()];
+            Arrays.fill(decoded, (byte) 4);
+            int decodedLength = decodeToBuffer(input, decoded);
+            /* If it is an exact size match, then don't re-allocate */
+            if (decodedLength == decoded.length) {
+                return decoded;
+            }
+            return Arrays.copyOf(decoded, decodedLength);
+        }
+
+
+        /**
+         * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be
+         * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
+         *
+         * @param input
+         *         the instance to convert; will never be null
+         *
+         * @return the converted instance; <b>must not</b> be null
+         */
+        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
+        public static int decodeToBuffer(@Nullable String input, byte[] decoded) {
+            Verify.verifyNotNull(input);
+            Verify.verify(decoded.length >= input.length(), "buffer too small");
+            if (input.length() == 0) {
+                return 0;
+            }
             // Convert the base58-encoded ASCII chars to a base58 byte sequence (base58 digits).
             byte[] input58 = new byte[input.length()];
             for (int i = 0; i < input.length(); ++i) {
@@ -228,7 +265,6 @@ public final class Base58 {
                 ++zeros;
             }
             // Convert base-58 digits to base-256 digits.
-            byte[] decoded = new byte[input.length()];
             int outputStart = decoded.length;
             for (int inputStart = zeros; inputStart < input58.length; ) {
                 decoded[--outputStart] = divmod(input58, inputStart, 58, 256);
@@ -240,8 +276,13 @@ public final class Base58 {
             while (outputStart < decoded.length && decoded[outputStart] == 0) {
                 ++outputStart;
             }
-            // Return decoded data (including original number of leading zeros).
-            return Arrays.copyOfRange(decoded, outputStart - zeros, decoded.length);
+            /* Move the data to the front */
+            int outputLength = decoded.length - outputStart;
+            /* Fill in zeroes */
+            Arrays.fill(decoded, 0, zeros, (byte) 0);
+            /* Copy over data */
+            System.arraycopy(decoded, outputStart, decoded, zeros, outputLength);
+            return outputLength + zeros;
         }
     }
 }
