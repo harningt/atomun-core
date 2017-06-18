@@ -44,10 +44,6 @@ dependencies {
     testCompile 'org.yaml:snakeyaml:1.18'
 }
 
-defaults {
-    includeGroovy = true
-}
-
 javadoc {
     options.tags "todo:a:TODO:"
 }
