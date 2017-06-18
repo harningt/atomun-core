@@ -1,9 +1,5 @@
 apply plugin: 'signing'
-
-/* Drop groovydoc from artifacts */
-configurations.archives.artifacts.removeAll({
-       return (it.classifier == 'groovydoc')
-})
+apply plugin: 'maven-publish'
 
 /* All non-snapshots must be signed */
 def isRelease = !version.toString().endsWith("SNAPSHOT")
@@ -40,7 +36,7 @@ uploadArchives {
         pom.project {
             name name
             description description
-            url defaults.siteUrl
+            url "https://github.com/harningt/${project.name}"
             inceptionYear '2015'
 
             scm {
