@@ -39,9 +39,7 @@ class PBKDF2VectorTestSpecification extends Specification {
         expect:
         dk.encodeHex().toString() == param.dk.encodeHex().toString()
         where:
-        param << Iterables.filter(PBKDF2VectorTestData.ALL_CASES, { p ->
-            return !p.slow
-        })
+        param << PBKDF2VectorTestData.ALL_CASES.findAll { !it.slow }
     }
     @Ignore
     @Unroll
@@ -51,8 +49,6 @@ class PBKDF2VectorTestSpecification extends Specification {
         expect:
         dk.encodeHex().toString() == param.dk.encodeHex().toString()
         where:
-        param << Iterables.filter(PBKDF2VectorTestData.ALL_CASES, { p ->
-            return p.slow
-        })
+        param << PBKDF2VectorTestData.ALL_CASES.findAll { it.slow }
     }
 }

@@ -157,7 +157,7 @@ public class RFC6979TestData {
                     if (testCase.canonicalize == null) {
                         testCase.canonicalize = canonicalize
                     }
-                    caseBuilder.add(testCase)
+                    caseList.add(testCase)
                 }
             }
         }
