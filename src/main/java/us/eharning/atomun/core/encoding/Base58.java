@@ -16,22 +16,27 @@
 
 package us.eharning.atomun.core.encoding;
 
-import com.google.common.base.Converter;
-import com.google.common.base.Verify;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import us.eharning.atomun.core.ValidationException;
 import us.eharning.atomun.core.annotations.Beta;
 import us.eharning.atomun.core.utility.Hash;
 
 import java.util.Arrays;
-import javax.annotation.Nullable;
 
 /**
  * Utility class to perform Base58 transformations.
  */
 @Beta
 public final class Base58 {
-    private static final Converter<byte[], String> CODEC = new ByteArrayBase58Codec();
+    private static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+    private static final char ENCODED_ZERO = ALPHABET[0];
+    private static final int[] INDEXES = new int[128];
+
+    static {
+        Arrays.fill(INDEXES, -1);
+        for (int i = 0; i < ALPHABET.length; i++) {
+            INDEXES[ALPHABET[i]] = i;
+        }
+    }
 
     /**
      * Prevent construction as this is a static utility class.
@@ -48,7 +53,7 @@ public final class Base58 {
      * @return base58-encoded string.
      */
     public static String encode(byte[] data) {
-        return CODEC.convert(data);
+        return performEncode(data);
     }
 
     /**
@@ -60,11 +65,11 @@ public final class Base58 {
      * @return Base58+checksum-encoded string.
      */
     public static String encodeWithChecksum(byte[] data) {
-        byte[] cs = Hash.INSTANCE.doubleHash(data);
+        byte[] cs = Hash.doubleHash(data);
         byte[] extended = new byte[data.length + 4];
         System.arraycopy(data, 0, extended, 0, data.length);
         System.arraycopy(cs, 0, extended, data.length, 4);
-        return CODEC.convert(extended);
+        return performEncode(extended);
     }
 
     /**
@@ -76,7 +81,7 @@ public final class Base58 {
      * @return bytes represented by string.
      */
     public static byte[] decode(String base58) {
-        return CODEC.reverse().convert(base58);
+        return performDecode(base58);
     }
 
     /**
@@ -86,10 +91,12 @@ public final class Base58 {
      *         Base58+checksum-encoded string.
      *
      * @return bytes represented by string.
-     * @throws ValidationException if the data is too short or there is a checksum mismatch.
+     *
+     * @throws ValidationException
+     *         if the data is too short or there is a checksum mismatch.
      */
     public static byte[] decodeWithChecksum(String base58) throws ValidationException {
-        byte[] bytes = Base58.decode(base58);
+        byte[] bytes = decode(base58);
         if (bytes.length < 4) {
             throw new ValidationException("Input string too short to contain checksum");
         }
@@ -115,174 +122,158 @@ public final class Base58 {
         throw new ValidationException("Checksum mismatch");
     }
 
+
     /**
-     * Utility class implementing the Base58-codec using a byte array.
-     * <p>Based on BitcoinJ's library.</p>
+     * Divides a number, represented as an array of bytes each containing a single digit
+     * in the specified base, by the given divisor. The given number is modified in-place
+     * to contain the quotient, and the return value is the remainder.
+     *
+     * @param number
+     *         the number to divide
+     * @param firstDigit
+     *         the index within the array of the first non-zero digit
+     *         (this is used for optimization by skipping the leading zeros)
+     * @param base
+     *         the base in which the number's digits are represented (up to 256)
+     * @param divisor
+     *         the number to divide by (up to 256)
+     *
+     * @return the remainder of the division operation
      */
-    @SuppressWarnings("unused")
-    @SuppressFBWarnings({"HE_INHERITS_EQUALS_USE_HASHCODE"})
-    private static final class ByteArrayBase58Codec extends Converter<byte[], String> {
-        public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
-        private static final char ENCODED_ZERO = ALPHABET[0];
-        private static final int[] INDEXES = new int[128];
+    private static byte divmod(byte[] number, int firstDigit, int base, int divisor) {
+        // this is just long division which accounts for the base of the input digits
+        int remainder = 0;
+        for (int i = firstDigit; i < number.length; i++) {
+            int digit = (int) number[i] & 0xFF;
+            int temp = remainder * base + digit;
+            number[i] = (byte) (temp / divisor);
+            remainder = temp % divisor;
+        }
+        return (byte) remainder;
+    }
 
-        static {
-            Arrays.fill(INDEXES, -1);
-            for (int i = 0; i < ALPHABET.length; i++) {
-                INDEXES[ALPHABET[i]] = i;
+    /**
+     * Returns a representation of {@code a} as an instance of type {@code B}. If {@code a} cannot be
+     * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
+     *
+     * @param input
+     *         the instance to convert; will never be null
+     *
+     * @return the converted instance; <b>must not</b> be null
+     */
+    private static String performEncode(byte[] input) {
+        if (null == input) {
+            throw new NullPointerException();
+        }
+        if (input.length == 0) {
+            return "";
+        }
+        // Count leading zeros.
+        int zeros = 0;
+        while (zeros < input.length && input[zeros] == 0) {
+            ++zeros;
+        }
+        // Convert base-256 digits to base-58 digits (plus conversion to ASCII characters)
+        input = Arrays.copyOf(input, input.length); // since we modify it in-place
+        char[] encoded = new char[input.length * 2]; // upper bound
+        int outputStart = encoded.length;
+        for (int inputStart = zeros; inputStart < input.length; ) {
+            encoded[--outputStart] = ALPHABET[divmod(input, inputStart, 256, 58)];
+            if (input[inputStart] == 0) {
+                ++inputStart; // optimization - skip leading zeros
             }
         }
-
-        /**
-         * Divides a number, represented as an array of bytes each containing a single digit
-         * in the specified base, by the given divisor. The given number is modified in-place
-         * to contain the quotient, and the return value is the remainder.
-         *
-         * @param number
-         *         the number to divide
-         * @param firstDigit
-         *         the index within the array of the first non-zero digit
-         *         (this is used for optimization by skipping the leading zeros)
-         * @param base
-         *         the base in which the number's digits are represented (up to 256)
-         * @param divisor
-         *         the number to divide by (up to 256)
-         *
-         * @return the remainder of the division operation
-         */
-        private static byte divmod(byte[] number, int firstDigit, int base, int divisor) {
-            // this is just long division which accounts for the base of the input digits
-            int remainder = 0;
-            for (int i = firstDigit; i < number.length; i++) {
-                int digit = (int) number[i] & 0xFF;
-                int temp = remainder * base + digit;
-                number[i] = (byte) (temp / divisor);
-                remainder = temp % divisor;
-            }
-            return (byte) remainder;
-        }
-
-        /**
-         * Returns a representation of {@code a} as an instance of type {@code B}. If {@code a} cannot be
-         * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
-         *
-         * @param input
-         *         the instance to convert; will never be null
-         *
-         * @return the converted instance; <b>must not</b> be null
-         */
-        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
-        @Override
-        protected String doForward(@Nullable byte[] input) {
-            Verify.verifyNotNull(input);
-            if (input.length == 0) {
-                return "";
-            }
-            // Count leading zeros.
-            int zeros = 0;
-            while (zeros < input.length && input[zeros] == 0) {
-                ++zeros;
-            }
-            // Convert base-256 digits to base-58 digits (plus conversion to ASCII characters)
-            input = Arrays.copyOf(input, input.length); // since we modify it in-place
-            char[] encoded = new char[input.length * 2]; // upper bound
-            int outputStart = encoded.length;
-            for (int inputStart = zeros; inputStart < input.length; ) {
-                encoded[--outputStart] = ALPHABET[divmod(input, inputStart, 256, 58)];
-                if (input[inputStart] == 0) {
-                    ++inputStart; // optimization - skip leading zeros
-                }
-            }
             /* NOTE: Cannot seem to find a case where this executes.
              * May have to pull in more test vectors to reproduce. */
-            // Preserve exactly as many leading encoded zeros in output as there were leading zeros in input.
-            while (outputStart < encoded.length && encoded[outputStart] == ENCODED_ZERO) {
-                ++outputStart;
-            }
-            while (--zeros >= 0) {
-                encoded[--outputStart] = ENCODED_ZERO;
-            }
-            // Return encoded string (including encoded leading zeros).
-            return new String(encoded, outputStart, encoded.length - outputStart);
+        // Preserve exactly as many leading encoded zeros in output as there were leading zeros in input.
+        while (outputStart < encoded.length && encoded[outputStart] == ENCODED_ZERO) {
+            ++outputStart;
         }
+        while (--zeros >= 0) {
+            encoded[--outputStart] = ENCODED_ZERO;
+        }
+        // Return encoded string (including encoded leading zeros).
+        return new String(encoded, outputStart, encoded.length - outputStart);
+    }
 
-        /**
-         * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be
-         * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
-         *
-         * @param input
-         *         the instance to convert; will never be null
-         *
-         * @return the converted instance; <b>must not</b> be null
-         */
-        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
-        @Override
-        protected byte[] doBackward(@Nullable String input) {
-            Verify.verifyNotNull(input);
-            if (input.length() == 0) {
-                return new byte[0];
-            }
-            byte[] decoded = new byte[input.length()];
-            Arrays.fill(decoded, (byte) 4);
-            int decodedLength = decodeToBuffer(input, decoded);
+    /**
+     * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be
+     * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
+     *
+     * @param input
+     *         the instance to convert; will never be null
+     *
+     * @return the converted instance; <b>must not</b> be null
+     */
+    private static byte[] performDecode(String input) {
+        if (null == input) {
+            throw new NullPointerException();
+        }
+        if (input.length() == 0) {
+            return new byte[0];
+        }
+        byte[] decoded = new byte[input.length()];
+        Arrays.fill(decoded, (byte) 4);
+        int decodedLength = decodeToBuffer(input, decoded);
             /* If it is an exact size match, then don't re-allocate */
-            if (decodedLength == decoded.length) {
-                return decoded;
-            }
-            return Arrays.copyOf(decoded, decodedLength);
+        if (decodedLength == decoded.length) {
+            return decoded;
         }
+        return Arrays.copyOf(decoded, decodedLength);
+    }
 
-
-        /**
-         * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be
-         * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
-         *
-         * @param input
-         *         the instance to convert; will never be null
-         *
-         * @return the converted instance; <b>must not</b> be null
-         */
-        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
-        public static int decodeToBuffer(@Nullable String input, byte[] decoded) {
-            Verify.verifyNotNull(input);
-            Verify.verify(decoded.length >= input.length(), "buffer too small");
-            if (input.length() == 0) {
-                return 0;
+    /**
+     * Returns a representation of {@code b} as an instance of type {@code A}. If {@code b} cannot be
+     * converted, an unchecked exception (such as {@link IllegalArgumentException}) should be thrown.
+     *
+     * @param input
+     *         the instance to convert; will never be null
+     *
+     * @return the converted instance; <b>must not</b> be null
+     */
+    private static int decodeToBuffer(String input, byte[] decoded) {
+        if (null == input || null == decoded) {
+            throw new NullPointerException();
+        }
+        if (decoded.length < input.length()) {
+            throw new IllegalArgumentException("buffer too small");
+        }
+        if (input.length() == 0) {
+            return 0;
+        }
+        // Convert the base58-encoded ASCII chars to a base58 byte sequence (base58 digits).
+        byte[] input58 = new byte[input.length()];
+        for (int i = 0; i < input.length(); ++i) {
+            char inputChar = input.charAt(i);
+            int digit = inputChar < 128 ? INDEXES[inputChar] : -1;
+            if (digit < 0) {
+                throw new IllegalArgumentException("Illegal character " + inputChar + " at position " + i);
             }
-            // Convert the base58-encoded ASCII chars to a base58 byte sequence (base58 digits).
-            byte[] input58 = new byte[input.length()];
-            for (int i = 0; i < input.length(); ++i) {
-                char inputChar = input.charAt(i);
-                int digit = inputChar < 128 ? INDEXES[inputChar] : -1;
-                if (digit < 0) {
-                    throw new IllegalArgumentException("Illegal character " + inputChar + " at position " + i);
-                }
-                input58[i] = (byte) digit;
+            input58[i] = (byte) digit;
+        }
+        // Count leading zeros.
+        int zeros = 0;
+        while (zeros < input58.length && input58[zeros] == 0) {
+            ++zeros;
+        }
+        // Convert base-58 digits to base-256 digits.
+        int outputStart = decoded.length;
+        for (int inputStart = zeros; inputStart < input58.length; ) {
+            decoded[--outputStart] = divmod(input58, inputStart, 58, 256);
+            if (input58[inputStart] == 0) {
+                ++inputStart; // optimization - skip leading zeros
             }
-            // Count leading zeros.
-            int zeros = 0;
-            while (zeros < input58.length && input58[zeros] == 0) {
-                ++zeros;
-            }
-            // Convert base-58 digits to base-256 digits.
-            int outputStart = decoded.length;
-            for (int inputStart = zeros; inputStart < input58.length; ) {
-                decoded[--outputStart] = divmod(input58, inputStart, 58, 256);
-                if (input58[inputStart] == 0) {
-                    ++inputStart; // optimization - skip leading zeros
-                }
-            }
-            // Ignore extra leading zeroes that were added during the calculation.
-            while (outputStart < decoded.length && decoded[outputStart] == 0) {
-                ++outputStart;
-            }
+        }
+        // Ignore extra leading zeroes that were added during the calculation.
+        while (outputStart < decoded.length && decoded[outputStart] == 0) {
+            ++outputStart;
+        }
             /* Move the data to the front */
-            int outputLength = decoded.length - outputStart;
+        int outputLength = decoded.length - outputStart;
             /* Fill in zeroes */
-            Arrays.fill(decoded, 0, zeros, (byte) 0);
+        Arrays.fill(decoded, 0, zeros, (byte) 0);
             /* Copy over data */
-            System.arraycopy(decoded, outputStart, decoded, zeros, outputLength);
-            return outputLength + zeros;
-        }
+        System.arraycopy(decoded, outputStart, decoded, zeros, outputLength);
+        return outputLength + zeros;
     }
 }
