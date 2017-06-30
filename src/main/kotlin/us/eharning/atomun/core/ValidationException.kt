@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core;
+package us.eharning.atomun.core
 
 /**
  * Base exception for invalid state due to invalid data input.
  */
-public class ValidationException extends Exception {
+class ValidationException : Exception {
     /**
      * Constructs a new exception with the specified detail message.  The
      * cause is not initialized, and may subsequently be initialized by
-     * a call to {@link #initCause}.
+     * a call to [.initCause].
      *
      * @param message
      *         the detail message. The detail message is saved for
-     *         later retrieval by the {@link #getMessage()} method.
+     *         later retrieval by the [.getMessage] method.
      */
-    public ValidationException(String message) {
-        super(message);
+    constructor(message: String) : super(message) {
     }
 
     /**
@@ -39,15 +38,14 @@ public class ValidationException extends Exception {
      *
      * @param message
      *         the detail message (which is saved for later retrieval
-     *         by the {@link #getMessage()} method).
+     *         by the [.getMessage] method).
      * @param cause
      *         the cause (which is saved for later retrieval by the
-     *         {@link #getCause()} method).  (A <tt>null</tt> value is
+     *         [.getCause] method).  (A null value is
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public ValidationException(String message, Throwable cause) {
-        super(message, cause);
+    constructor(message: String, cause: Throwable) : super(message, cause) {
     }
 
     /**
@@ -55,11 +53,10 @@ public class ValidationException extends Exception {
      *
      * @param cause
      *         the cause (which is saved for later retrieval by the
-     *         {@link #getCause()} method).  (A <tt>null</tt> value is
+     *         [.getCause] method).  (A null value is
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public ValidationException(Exception cause) {
-        super(cause);
+    constructor(cause: Throwable) : super(cause) {
     }
 }

@@ -44,7 +44,7 @@ class BouncyCastleECKeyPairSpecification extends Specification {
     def "signature-verification passes - not-compressed"() {
         given:
         boolean isCompressed = false
-        ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
+        ECKey keyPair = ECKeyFactory.instance.generateRandom(isCompressed)
         ECKey publicKey = keyPair.public
         byte[] toSign = new byte[100];
         random.nextBytes(toSign);
@@ -72,22 +72,6 @@ class BouncyCastleECKeyPairSpecification extends Specification {
         publicKey.ECDSA.verify(toSign, signature)
         where:
         [ i ] << ([0..20].iterator())
-    }
-
-    def "signature with forced failure throws - for coverage"() {
-        given:
-        boolean isCompressed = true
-        ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
-
-        byte[] toSign = new byte[100];
-        random.nextBytes(toSign);
-        ECPoint publicPoint = CURVE.getCurve().decodePoint(keyPair.exportPublic());
-        BouncyCastleECSigner ecdsa = Spy(BouncyCastleECSigner.class, constructorArgs: [ keyPair.getPrivateExponent(), publicPoint ])
-        ecdsa.calculateSignature(_) >> { throw new IOException("Illegal state"); }
-        when:
-        ecdsa.sign(toSign);
-        then:
-        thrown(IllegalStateException)
     }
 
     def "signature-verification of modified data fails"() {

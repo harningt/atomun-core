@@ -14,35 +14,36 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.ec;
-
-import javax.annotation.Nonnull;
+package us.eharning.atomun.core.ec
 
 /**
  * Utility interface wrapping ECDSA operations.
  */
-public interface ECDSA {
+interface ECDSA {
     /**
      * Perform an ECDSA signature using the private key.
-     *
+
      * @param hash
-     *         byte array to sign.
-     *
+     * *         byte array to sign.
+     * *
+     * *
      * @return ASN.1 representation of the signature.
+     * *
      * @throws UnsupportedOperationException if only the public key is available
      */
-    @Nonnull
-    byte[] sign(@Nonnull byte[] hash);
+    fun sign(hash: ByteArray): ByteArray
 
     /**
      * Verify an ECDSA signature using the public key.
-     *
+
      * @param hash
-     *         byte array of the hash to verify.
+     * *         byte array of the hash to verify.
+     * *
      * @param signature
-     *         ASN.1 representation of the signature to verify hash with.
-     *
+     * *         ASN.1 representation of the signature to verify hash with.
+     * *
+     * *
      * @return true if the signature matches, else false.
      */
-    boolean verify(@Nonnull byte[] hash, @Nonnull byte[] signature);
+    fun verify(hash: ByteArray, signature: ByteArray): Boolean
 }

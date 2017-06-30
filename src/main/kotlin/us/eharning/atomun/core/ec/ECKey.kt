@@ -14,64 +14,58 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.ec;
+package us.eharning.atomun.core.ec
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.Immutable
 
 /**
  * Base Elliptical Cryptography keypair interface.
- * <p>
+ *
+ *
  * Likely to change in the future and be pushed to a common library.
- * </p>
+ *
  */
 @Immutable
-public interface ECKey {
+interface ECKey {
     /**
      * Export the private key in bitcoin 'standard' form - exactly 32-bytes.
-     *
+
      * @return exported 32-byte private key or null if not present.
      */
-    @CheckForNull
-    byte[] exportPrivate();
+    fun exportPrivate(): ByteArray?
 
     /**
      * Returns whether or not this keypair is populated with the private key.
-     *
+
      * @return true if the private key is present.
      */
-    boolean hasPrivate();
+    fun hasPrivate(): Boolean
 
     /**
      * Export the public key in ASN.1-encoded form.
-     *
+
      * @return ASN.1 encoded public key bytes.
      */
-    @Nonnull
-    byte[] exportPublic();
+    fun exportPublic(): ByteArray
 
     /**
      * Obtain the 'address hash' per Bitcoin rules.
-     *
+
      * @return 20-byte address hash byte array
      */
-    @Nonnull
-    byte[] getAddressHash();
+    val addressHash: ByteArray
 
     /**
      * Obtain a reference to this key, just including public pieces.
-     *
+
      * @return instance with just public data present.
      */
-    @Nonnull
-    ECKey getPublic();
+    val public: ECKey
 
     /**
      * Obtain a reference to the ECDSA operator for this key.
-     *
+
      * @return instance with appropriate ECDSA capabilities.
      */
-    @Nonnull
-    ECDSA getECDSA();
+    val ECDSA: ECDSA
 }
