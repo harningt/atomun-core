@@ -53,6 +53,11 @@ apply from: "$rootDir/gradle/maven-publish.gradle"
 wrapper {
     gradleVersion = '4.0'
 }
+
+license {
+    mapping 'kt', 'SLASHSTAR_STYLE'
+}
+
 findbugs {
     excludeFilter file('gradle/findbugs-exclude.xml')
 }
