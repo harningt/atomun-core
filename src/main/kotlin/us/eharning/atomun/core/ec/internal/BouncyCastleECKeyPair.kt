@@ -16,9 +16,6 @@
 
 package us.eharning.atomun.core.ec.internal
 
-import com.google.common.base.Objects
-import com.google.common.base.Preconditions
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters
@@ -28,10 +25,9 @@ import us.eharning.atomun.core.ec.ECDSA
 import us.eharning.atomun.core.ec.ECKey
 import us.eharning.atomun.core.ec.internal.BouncyCastleECKeyConstants.CURVE
 import us.eharning.atomun.core.encoding.Base58
-
 import java.math.BigInteger
 import java.security.SecureRandom
-import java.util.Arrays
+import java.util.*
 import javax.annotation.concurrent.Immutable
 
 /**
@@ -121,18 +117,15 @@ constructor (
             return false
         }
         other as BouncyCastleECKeyPair
-        return Objects.equal(compressed, other.compressed)
+        return compressed == other.compressed
                 && Arrays.equals(encodedPublicKey, other.encodedPublicKey)
-                && Objects.equal(privateExponent, other.privateExponent)
+                && privateExponent == other.privateExponent
     }
 
-    /**
-     * Returns a hash code value for the object.
-     *
-     * @return a hash code value for this object.
-     */
-    override fun hashCode(): Int {
-        return Objects.hashCode(compressed, Arrays.hashCode(encodedPublicKey), privateExponent)
+    override fun hashCode(): Int{
+        var result = super.hashCode()
+        result = 31 * result + privateExponent.hashCode()
+        return result
     }
 
     companion object {
@@ -174,7 +167,6 @@ constructor (
         @JvmStatic
         @Throws(ValidationException::class)
         fun importSerialized(serializedPrivateExponent: ByteArray, compressed: Boolean): BouncyCastleECKeyPair {
-            Preconditions.checkNotNull(serializedPrivateExponent)
             if (serializedPrivateExponent.size != 32) {
                 throw ValidationException("Invalid private key")
             }

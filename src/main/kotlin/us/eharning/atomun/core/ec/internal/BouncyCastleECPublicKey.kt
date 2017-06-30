@@ -16,15 +16,10 @@
 
 package us.eharning.atomun.core.ec.internal
 
-import com.google.common.base.Objects
-import com.google.common.base.Preconditions
 import us.eharning.atomun.core.ec.ECDSA
 import us.eharning.atomun.core.ec.ECKey
 import us.eharning.atomun.core.utility.Hash
-
-import java.security.SecureRandom
-import java.util.Arrays
-import javax.annotation.CheckForNull
+import java.util.*
 import javax.annotation.concurrent.Immutable
 
 /**
@@ -122,12 +117,9 @@ constructor (
                 && Arrays.equals(encodedPublicKey, other.encodedPublicKey)
     }
 
-    /**
-     * Returns a hash code value for the object.
-     *
-     * @return a hash code value for this object.
-     */
     override fun hashCode(): Int {
-        return Objects.hashCode(Arrays.hashCode(encodedPublicKey), compressed)
+        var result = compressed.hashCode()
+        result = 31 * result + Arrays.hashCode(encodedPublicKey)
+        return result
     }
 }

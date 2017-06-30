@@ -16,9 +16,8 @@
 
 package us.eharning.atomun.core.utility
 
-import com.google.common.annotations.Beta
 import org.bouncycastle.crypto.digests.RIPEMD160Digest
-
+import us.eharning.atomun.core.annotations.Beta
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 

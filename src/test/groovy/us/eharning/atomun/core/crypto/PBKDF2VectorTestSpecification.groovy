@@ -16,7 +16,6 @@
 
 package us.eharning.atomun.core.crypto
 
-import com.google.common.collect.Iterables
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll

@@ -16,7 +16,6 @@
 
 package us.eharning.atomun.core.ec.internal
 
-import com.google.common.base.Verify
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.DERSequenceGenerator
@@ -156,7 +155,6 @@ internal class BouncyCastleECSigner
          */
         @JvmStatic
         fun fromPrivateKey(privateKey: ECKey): BouncyCastleECSigner {
-            Verify.verifyNotNull(privateKey)
             assert(privateKey is BouncyCastleECKeyPair)
             val publicPoint = CURVE.curve.decodePoint(privateKey.exportPublic())
             val privateExponent = (privateKey as BouncyCastleECKeyPair).privateExponent
@@ -174,7 +172,6 @@ internal class BouncyCastleECSigner
          */
         @JvmStatic
         fun fromPublicKey(publicKey: ECKey): BouncyCastleECSigner {
-            Verify.verifyNotNull(publicKey)
             val publicPoint = CURVE.curve.decodePoint(publicKey.exportPublic())
             return BouncyCastleECSigner(null, publicPoint)
         }

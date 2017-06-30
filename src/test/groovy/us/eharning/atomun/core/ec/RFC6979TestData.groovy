@@ -16,11 +16,8 @@
 
 package us.eharning.atomun.core.ec
 
-import com.google.common.base.Charsets
-import com.google.common.base.MoreObjects
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.Iterables
 import groovy.transform.Canonical
+import kotlin.text.Charsets
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
 import org.bouncycastle.util.BigIntegers
@@ -114,18 +111,27 @@ public class RFC6979TestData {
         }
         public boolean canTestKGeneration() {
             return (null != secexp || null != wif) &&
-                    null != expectedKList && !Iterables.isEmpty(expectedKList) &&
+                    null != expectedKList && expectedKList.size() != 0 &&
                     (null != messageHash);
         }
 
+        @Override
         public String toString() {
-            return MoreObjects.toStringHelper(this)
-                    .add("secexp", secexp)
-                    .add("wif", wif)
-                    .add("messageHash", messageHash)
-                    .add("expectedSignature", expectedSignature)
-                    .add("expectedKList", expectedKList)
-                    .toString();
+            final StringBuffer sb = new StringBuffer("TestCase{");
+            sb.append("secexp=").append(secexp);
+            sb.append(", wif='").append(wif).append('\'');
+            sb.append(", messageHash=");
+            if (messageHash == null) sb.append("null");
+            else {
+                sb.append('[');
+                for (int i = 0; i < messageHash.length; ++i)
+                    sb.append(i == 0 ? "" : ", ").append(messageHash[i]);
+                sb.append(']');
+            }
+            sb.append(", expectedSignature='").append(expectedSignature).append('\'');
+            sb.append(", expectedKList=").append(expectedKList);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -135,18 +141,18 @@ public class RFC6979TestData {
 
     static {
         ALL_CASES = parseBulkYAMLResource("us/eharning/atomun/core/ec/RFC6979-cases.yaml")
-        SIGNATURE_CASES = Iterables.filter(ALL_CASES, {
+        SIGNATURE_CASES = ALL_CASES.findAll {
             return it.canTestSigning()
-        })
-        K_GENERATOR_CASES = Iterables.filter(ALL_CASES, {
+        }
+        K_GENERATOR_CASES = ALL_CASES.findAll {
             return it.canTestKGeneration()
-        })
+        }
     }
 
     static Iterable<TestCase> parseBulkYAMLResource(String resourceName) {
         Yaml yaml = new Yaml()
-        ImmutableList.Builder<TestCase> caseBuilder = ImmutableList.builder();
-        yaml.loadAll(RFC6979TestData.class.classLoader.getResourceAsStream(resourceName)).collect {
+        def caseList = new ArrayList<TestCase>()
+        yaml.loadAll(RFC6979TestData.class.classLoader.getResourceAsStream(resourceName)).forEach {
             /* For each element in the chunk, yield the related test case with the group label */
             String source = it.source
             boolean canonicalize = !!it.canonicalize
@@ -161,6 +167,6 @@ public class RFC6979TestData {
                 }
             }
         }
-        return caseBuilder.build()
+        return caseList.asImmutable()
     }
 }

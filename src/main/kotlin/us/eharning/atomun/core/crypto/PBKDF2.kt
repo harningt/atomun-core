@@ -16,13 +16,9 @@
 
 package us.eharning.atomun.core.crypto
 
+import us.eharning.atomun.core.annotations.Beta
 import java.lang.System.arraycopy
-
-import com.google.common.annotations.Beta
-import com.google.common.base.Preconditions
-
 import java.security.GeneralSecurityException
-import javax.annotation.ParametersAreNonnullByDefault
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.xor
@@ -88,7 +84,8 @@ object PBKDF2 {
         /* Key length cannot possibly be larger than PBKDF2 limit since length type is signed int */
         assert(dkLen <= (Math.pow(2.0, 32.0) - 1) * hLen)
         /* Cannot store more than dkLen in smaller array */
-        Preconditions.checkArgument(dkLen <= DK.size, "(%s) must not be greater than size of the output array (%s)", dkLen, DK.size)
+
+        require(dkLen <= DK.size, { "($dkLen) must not be greater than size of the output array (${DK.size})" })
 
         val U = ByteArray(hLen)
         val T = ByteArray(hLen)
