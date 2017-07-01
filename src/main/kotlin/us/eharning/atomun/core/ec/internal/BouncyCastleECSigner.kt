@@ -87,9 +87,9 @@ internal class BouncyCastleECSigner
         signer.init(true, ECPrivateKeyParameters(privateExponent, DOMAIN))
         val signature = signer.generateSignature(hash)
         /* Need to canonicalize signature up front ... */
-        if (canonicalize && signature[1].compareTo(HALF_CURVE_ORDER) > 0) {
+        if (canonicalize && signature[1] > HALF_CURVE_ORDER) {
             /* BOP does not do this */
-            signature[1] = CURVE.n.subtract(signature[1])
+            signature[1] = CURVE.n - signature[1]
         }
         return calculateSignature(signature)
     }

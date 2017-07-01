@@ -40,11 +40,7 @@ constructor (
         protected val compressed: Boolean
 ) : ECKey {
 
-    protected val encodedPublicKey: ByteArray
-
-    init {
-        this.encodedPublicKey = Arrays.copyOf(encodedPublicKey, encodedPublicKey.size)
-    }
+    protected val encodedPublicKey: ByteArray = encodedPublicKey.copyOf()
 
     /**
      * Obtain the 'address hash' per Bitcoin rules.
@@ -78,7 +74,7 @@ constructor (
      * @return ASN.1 encoded public key bytes.
      */
     override fun exportPublic(): ByteArray {
-        return Arrays.copyOf(encodedPublicKey, encodedPublicKey.size)
+        return encodedPublicKey.copyOf()
     }
 
     /**
