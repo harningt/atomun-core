@@ -93,7 +93,8 @@ Tags will be signed by the following privately held hardware-based GPG key.
 
 ### Runtime
 
- * Guava 19.0
+ * Kotlin
+ * Bouncycastle
 
 ### Test
 
@@ -103,8 +104,6 @@ Tags will be signed by the following privately held hardware-based GPG key.
 ### Quality
 
  * FindBugs
- * org.ajoberstar gradle defaults
-    * many included things, such as license plugin
 
 # Acknowledgements
 

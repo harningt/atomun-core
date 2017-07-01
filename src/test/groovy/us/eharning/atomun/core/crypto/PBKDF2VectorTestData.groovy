@@ -16,10 +16,9 @@
 
 package us.eharning.atomun.core.crypto
 
-import com.google.common.base.Charsets
-import com.google.common.collect.ImmutableList
 import groovy.transform.AutoClone
 import groovy.transform.Canonical
+import kotlin.text.Charsets
 import org.yaml.snakeyaml.Yaml
 
 /**
@@ -58,7 +57,7 @@ class PBKDF2VectorTestData {
 
     static List<TestCase> parseYamlResource(String resourceName) {
         Yaml yaml = new Yaml()
-        ImmutableList.Builder<TestCase> caseBuilder = ImmutableList.builder();
+        def cases = new ArrayList<TestCase>()
         yaml.loadAll(PBKDF2VectorTestData.class.classLoader.getResourceAsStream(resourceName)).each {
             String alg = it.alg
             if (it.skip) {
@@ -69,9 +68,9 @@ class PBKDF2VectorTestData {
                 if (!testCase.alg) {
                     testCase.alg = alg
                 }
-                caseBuilder.add(testCase)
+                cases.add(testCase)
             }
         }
-        return caseBuilder.build()
+        return cases.asImmutable()
     }
 }

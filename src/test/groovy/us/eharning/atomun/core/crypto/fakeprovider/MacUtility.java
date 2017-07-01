@@ -16,8 +16,6 @@
 
 package us.eharning.atomun.core.crypto.fakeprovider;
 
-import com.google.common.base.Throwables;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
@@ -66,7 +64,7 @@ public class MacUtility {
             constructor.setAccessible(true);
             return constructor.newInstance(spi, provider, algorithm);
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }

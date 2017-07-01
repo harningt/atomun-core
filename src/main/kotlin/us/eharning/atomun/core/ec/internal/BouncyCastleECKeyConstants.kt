@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2016, 2017 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package us.eharning.atomun.core.ec.internal;
+package us.eharning.atomun.core.ec.internal
 
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.asn1.sec.SECNamedCurves
+import org.bouncycastle.asn1.x9.X9ECParameters
+import org.bouncycastle.crypto.params.ECDomainParameters
 
 /**
  * Utility class to store constants related to ECKeys used in Bitcoin.
  */
-final class BouncyCastleECKeyConstants {
-    static final X9ECParameters CURVE = SECNamedCurves.getByName("secp256k1");
-
-    static final ECDomainParameters DOMAIN = new ECDomainParameters(CURVE.getCurve(), CURVE.getG(), CURVE.getN(), CURVE.getH());
-
-    private BouncyCastleECKeyConstants() {
-    }
+internal object BouncyCastleECKeyConstants {
+    @JvmField
+    val CURVE = SECNamedCurves.getByName("secp256k1")!!
+    @JvmField
+    val DOMAIN = ECDomainParameters(CURVE.curve, CURVE.g, CURVE.n, CURVE.h)
 }
