@@ -85,6 +85,7 @@ object PBKDF2 {
         assert(dkLen <= (Math.pow(2.0, 32.0) - 1) * hLen)
         /* Cannot store more than dkLen in smaller array */
 
+        require(dkLen > 0, { "Derived key must not be empty" })
         require(dkLen <= DK.size, { "($dkLen) must not be greater than size of the output array (${DK.size})" })
 
         val U = ByteArray(hLen)

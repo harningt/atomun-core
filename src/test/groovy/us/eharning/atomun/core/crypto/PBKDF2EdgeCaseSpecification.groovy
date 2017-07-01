@@ -46,6 +46,19 @@ class PBKDF2EdgeCaseSpecification extends Specification {
         thrown(AssertionError)
     }
 
+    def 'PBKDF2 fails if output key length == 0'() {
+        given:
+        def mac = Mac.getInstance("HMACSHA1")
+        byte[] EMPTY_SALT = new byte[0]
+        int iterations = 1
+        int outputLength = 0
+        byte[] output = new byte[0]
+        when:
+        PBKDF2.pbkdf2(mac, EMPTY_SALT, iterations, output, outputLength)
+        then:
+        thrown(IllegalArgumentException)
+    }
+
     def 'PBKDF2 fails if output key length > output array'() {
         given:
         def mac = Mac.getInstance("HMACSHA1")
