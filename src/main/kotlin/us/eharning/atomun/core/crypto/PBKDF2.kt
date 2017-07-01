@@ -91,7 +91,7 @@ object PBKDF2 {
         val T = ByteArray(hLen)
         val block1 = ByteArray(S.size + 4)
 
-        val l = Math.ceil(dkLen.toDouble() / hLen).toInt()
+        val l = 1 + (dkLen - 1) / hLen
         val r = dkLen - (l - 1) * hLen
 
         arraycopy(S, 0, block1, 0, S.size)
