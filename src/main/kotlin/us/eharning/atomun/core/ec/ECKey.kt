@@ -16,6 +16,7 @@
 
 package us.eharning.atomun.core.ec
 
+import okio.ByteString
 import javax.annotation.concurrent.Immutable
 
 /**
@@ -32,7 +33,7 @@ interface ECKey {
 
      * @return exported 32-byte private key or null if not present.
      */
-    fun exportPrivate(): ByteArray?
+    fun exportPrivate(): ByteString?
 
     /**
      * Returns whether or not this keypair is populated with the private key.
@@ -46,14 +47,14 @@ interface ECKey {
 
      * @return ASN.1 encoded public key bytes.
      */
-    fun exportPublic(): ByteArray
+    fun exportPublic(): ByteString
 
     /**
      * Obtain the 'address hash' per Bitcoin rules.
 
      * @return 20-byte address hash byte array
      */
-    val addressHash: ByteArray
+    val addressHash: ByteString
 
     /**
      * Obtain a reference to this key, just including public pieces.

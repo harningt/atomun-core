@@ -16,10 +16,12 @@
 
 package us.eharning.atomun.core.ec.internal
 
+import okio.ByteString
+import okio.ByteStrings
+import okio.process
 import us.eharning.atomun.core.ec.ECDSA
 import us.eharning.atomun.core.ec.ECKey
 import us.eharning.atomun.core.utility.Hash
-import java.util.*
 import javax.annotation.concurrent.Immutable
 
 /**
@@ -36,26 +38,26 @@ open class BouncyCastleECPublicKey
  *         whether or not the EC public key is in compressed point form.
  */
 constructor (
-        encodedPublicKey: ByteArray,
+        protected val encodedPublicKey: ByteString,
         protected val compressed: Boolean
 ) : ECKey {
-
-    protected val encodedPublicKey: ByteArray = encodedPublicKey.copyOf()
-
     /**
      * Obtain the 'address hash' per Bitcoin rules.
      *
      * @return 20-byte address hash byte array
      */
-    override val addressHash: ByteArray
-        get() = Hash.keyHash(encodedPublicKey)
+    override val addressHash: ByteString by lazy {
+        encodedPublicKey.process {
+            ByteStrings.takeOwnership(Hash.keyHash(it))
+        }
+    }
 
     /**
      * Export the private key in bitcoin 'standard' form - exactly 32-bytes.
      *
      * @return exported 32-byte private key or null if not present.
      */
-    override fun exportPrivate(): ByteArray? {
+    override fun exportPrivate(): ByteString? {
         return null
     }
 
@@ -73,8 +75,8 @@ constructor (
      *
      * @return ASN.1 encoded public key bytes.
      */
-    override fun exportPublic(): ByteArray {
-        return encodedPublicKey.copyOf()
+    override fun exportPublic(): ByteString {
+        return encodedPublicKey
     }
 
     /**
@@ -110,12 +112,12 @@ constructor (
         }
         other as BouncyCastleECPublicKey
         return compressed == other.compressed
-                && Arrays.equals(encodedPublicKey, other.encodedPublicKey)
+                && encodedPublicKey == other.encodedPublicKey
     }
 
     override fun hashCode(): Int {
         var result = compressed.hashCode()
-        result = 31 * result + Arrays.hashCode(encodedPublicKey)
+        result = 31 * result + encodedPublicKey.hashCode()
         return result
     }
 }

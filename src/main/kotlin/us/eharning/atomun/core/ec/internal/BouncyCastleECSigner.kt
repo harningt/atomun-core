@@ -16,6 +16,7 @@
 
 package us.eharning.atomun.core.ec.internal
 
+import okio.process
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.DERSequenceGenerator
@@ -54,6 +55,7 @@ internal class BouncyCastleECSigner
         private val canonicalize: Boolean = true
 ) : ECDSA {
 
+
     /**
      * Obtain an ECDSA instance with the given canonicalization bit set.
      *
@@ -63,6 +65,7 @@ internal class BouncyCastleECSigner
      * @return
      *         ECDSA instance with canonicalization set to the given value.
      */
+    @Suppress("unused") // Unit test
     fun withCanonicalize(canonicalize: Boolean): BouncyCastleECSigner {
         if (this.canonicalize == canonicalize) {
             return this
@@ -123,7 +126,6 @@ internal class BouncyCastleECSigner
      *
      * @return true if the signature matches, else false.
      */
-    @SuppressWarnings("checkstyle:localvariablename")
     override fun verify(hash: ByteArray, signature: ByteArray): Boolean {
         try {
             val signer = ECDSASigner()
@@ -156,7 +158,7 @@ internal class BouncyCastleECSigner
         @JvmStatic
         fun fromPrivateKey(privateKey: ECKey): BouncyCastleECSigner {
             assert(privateKey is BouncyCastleECKeyPair)
-            val publicPoint = CURVE.curve.decodePoint(privateKey.exportPublic())
+            val publicPoint = getPublicPoint(privateKey)
             val privateExponent = (privateKey as BouncyCastleECKeyPair).privateExponent
             return BouncyCastleECSigner(privateExponent, publicPoint)
         }
@@ -172,8 +174,23 @@ internal class BouncyCastleECSigner
          */
         @JvmStatic
         fun fromPublicKey(publicKey: ECKey): BouncyCastleECSigner {
-            val publicPoint = CURVE.curve.decodePoint(publicKey.exportPublic())
+            val publicPoint = getPublicPoint(publicKey)
             return BouncyCastleECSigner(null, publicPoint)
+        }
+
+        /**
+         * Decode the public key data into a public point.
+         *
+         * @param key
+         *         Key instance data to extract the public key from.
+         *
+         * @return decoded public point.
+         */
+        private fun getPublicPoint(key: ECKey): ECPoint {
+            val publicKeyData = key.exportPublic()
+            return publicKeyData.process {
+                CURVE.curve.decodePoint(it)
+            }
         }
     }
 }

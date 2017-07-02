@@ -18,6 +18,7 @@ package us.eharning.atomun.core.ec
 
 import groovy.transform.Canonical
 import kotlin.text.Charsets
+import okio.ByteStringsKt
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
 import org.bouncycastle.util.BigIntegers
@@ -41,7 +42,7 @@ public class RFC6979TestData {
             secexp = bi
         }
         public String wif;
-        private byte[] messageHash;
+        public byte[] messageHash;
         public void setHash(String hash) {
             if (null == description) {
                 description = hash
@@ -92,7 +93,7 @@ public class RFC6979TestData {
         }
         public ECKey getKey() {
             if (null != wif && null != secexp) {
-                BigInteger wifSecretExponent = BigIntegers.fromUnsignedByteArray(ECKeyFactory.instance.fromWIF(wif).exportPrivate())
+                def wifSecretExponent = ByteStringsKt.toBigInteger(ECKeyFactory.instance.fromWIF(wif).exportPrivate(), 1)
                 assert(wifSecretExponent == secexp)
             }
             if (null != wif) {

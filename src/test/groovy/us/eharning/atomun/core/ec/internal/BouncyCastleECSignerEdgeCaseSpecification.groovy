@@ -16,33 +16,21 @@
 
 package us.eharning.atomun.core.ec.internal
 
+import okio.ByteString
 import spock.lang.Specification
 import us.eharning.atomun.core.ec.ECDSA
 import us.eharning.atomun.core.ec.ECKey
 import us.eharning.atomun.core.ec.ECKeyFactory
 
-import java.security.SecureRandom
-
 /**
  * Tests for the BouncyCastleECSigner edge cases.
  */
 class BouncyCastleECSignerEdgeCaseSpecification extends Specification {
-    static Random random = new SecureRandom()
-
-    def "getting a signer from a BCKP subclass passes"() {
-        given: "an EC keypair that meets rules, but is a subclass"
-        def privateKey = new BouncyCastleECKeyPair(BigInteger.ONE, new byte[1], false) {}
-        when:
-        BouncyCastleECSigner.fromPrivateKey(privateKey);
-        then:
-        noExceptionThrown()
-    }
-
     def "getting a signer from a BC PublicKey fails"() {
         given: "an EC keypair that meets rules, but is a subclass"
         def privateKey = ECKeyFactory.instance.generateRandom(false).public
         when:
-        BouncyCastleECSigner.fromPrivateKey(privateKey);
+        BouncyCastleECSigner.fromPrivateKey(privateKey)
         then:
         thrown(AssertionError)
     }
@@ -51,20 +39,20 @@ class BouncyCastleECSignerEdgeCaseSpecification extends Specification {
         given: "an EC keypair that meets rules, but is a subclass"
         def privateKey = new ECKey() {
             @Override
-            byte[] exportPrivate() {
-                return new byte[0]
+            ByteString exportPrivate() {
+                return ByteString.EMPTY
             }
             @Override
             boolean hasPrivate() {
                 return true
             }
             @Override
-            byte[] exportPublic() {
-                return new byte[0]
+            ByteString exportPublic() {
+                return ByteString.EMPTY
             }
             @Override
-            byte[] getAddressHash() {
-                return new byte[0]
+            ByteString getAddressHash() {
+                return ByteString.EMPTY
             }
             @Override
             ECKey getPublic() {

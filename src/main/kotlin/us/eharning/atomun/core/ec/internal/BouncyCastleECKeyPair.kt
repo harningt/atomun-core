@@ -16,6 +16,9 @@
 
 package us.eharning.atomun.core.ec.internal
 
+import okio.ByteString
+import okio.ByteStrings
+import okio.copyTo
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters
@@ -27,7 +30,6 @@ import us.eharning.atomun.core.ec.internal.BouncyCastleECKeyConstants.CURVE
 import us.eharning.atomun.core.encoding.Base58
 import java.math.BigInteger
 import java.security.SecureRandom
-import java.util.*
 import javax.annotation.concurrent.Immutable
 
 /**
@@ -46,25 +48,25 @@ open class BouncyCastleECKeyPair
  * @param compressed
  *         whether or not to use compressed point form.
  */
-constructor (
+private constructor (
         internal val privateExponent: BigInteger,
-        encodedPublicKey: ByteArray? = null,
+        encodedPublicKey: ByteString,
         compressed: Boolean
-) : BouncyCastleECPublicKey(encodedPublicKey ?: CURVE.g.multiply(privateExponent).getEncoded(compressed), compressed) {
+) : BouncyCastleECPublicKey(encodedPublicKey, compressed) {
 
     /**
      * Export the private key in bitcoin 'standard' form - exactly 32-bytes.
      *
      * @return exported 32-byte private key.
      */
-    override fun exportPrivate(): ByteArray? {
+    override fun exportPrivate(): ByteString? {
         var privateBytes = privateExponent.toByteArray()
         if (privateBytes.size != 32) {
             val tmp = ByteArray(32)
             System.arraycopy(privateBytes, Math.max(0, privateBytes.size - 32), tmp, Math.max(0, 32 - privateBytes.size), Math.min(32, privateBytes.size))
             privateBytes = tmp
         }
-        return privateBytes
+        return ByteStrings.takeOwnership(privateBytes)
     }
 
     /**
@@ -118,7 +120,7 @@ constructor (
         }
         other as BouncyCastleECKeyPair
         return compressed == other.compressed
-                && Arrays.equals(encodedPublicKey, other.encodedPublicKey)
+                && encodedPublicKey == other.encodedPublicKey
                 && privateExponent == other.privateExponent
     }
 
@@ -148,7 +150,23 @@ constructor (
             val privParams = keypair.private as ECPrivateKeyParameters
             val pubParams = keypair.public as ECPublicKeyParameters
 
-            return BouncyCastleECKeyPair(privParams.d, pubParams.q.getEncoded(compressed), compressed)
+            return BouncyCastleECKeyPair(privParams.d, ByteStrings.takeOwnership(pubParams.q.getEncoded(compressed)), compressed)
+        }
+
+        /**
+         * Utility method to construct the key, autocalculating any missing properties.
+         */
+        @JvmStatic
+        fun create(privateExponent: BigInteger, encodedPublicKey: ByteString? = null, compressed: Boolean): BouncyCastleECKeyPair {
+            val publicKey = encodedPublicKey ?: publicFromPrivate(privateExponent, compressed)
+            return BouncyCastleECKeyPair(privateExponent, publicKey, compressed)
+        }
+
+        private fun publicFromPrivate(privateExponent: BigInteger, compressed: Boolean): ByteString {
+            return {
+                val ecPoint = CURVE.g.multiply(privateExponent)
+                ByteStrings.takeOwnership(ecPoint.getEncoded(compressed))
+            }()
         }
 
         /**
@@ -170,7 +188,7 @@ constructor (
             if (serializedPrivateExponent.size != 32) {
                 throw ValidationException("Invalid private key")
             }
-            return BouncyCastleECKeyPair(BigInteger(1, serializedPrivateExponent).mod(CURVE.n), null, compressed)
+            return create(BigInteger(1, serializedPrivateExponent).mod(CURVE.n), null, compressed)
         }
 
         /**
@@ -198,15 +216,15 @@ constructor (
         private fun bytesWIF(key: BouncyCastleECKeyPair): ByteArray {
             val k = key.exportPrivate()!!
             if (key.compressed) {
-                val ek = ByteArray(k.size + 2)
+                val ek = ByteArray(k.size() + 2)
                 ek[0] = 0x80.toByte()
-                System.arraycopy(k, 0, ek, 1, k.size)
-                ek[k.size + 1] = 0x01
+                k.copyTo(ek, 1)
+                ek[k.size() + 1] = 0x01
                 return ek
             } else {
-                val ek = ByteArray(k.size + 1)
+                val ek = ByteArray(k.size() + 1)
                 ek[0] = 0x80.toByte()
-                System.arraycopy(k, 0, ek, 1, k.size)
+                k.copyTo(ek, 1)
                 return ek
             }
         }

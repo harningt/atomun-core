@@ -18,15 +18,14 @@ package us.eharning.atomun.core.ec.internal
 
 import net.trajano.commons.testing.EqualsTestUtil
 import net.trajano.commons.testing.UtilityClassTestUtil
-import org.bouncycastle.math.ec.ECPoint
+import okio.ByteString
+import okio.ByteStringsKt
 import spock.lang.Specification
 import us.eharning.atomun.core.ValidationException
 import us.eharning.atomun.core.ec.ECKey
 import us.eharning.atomun.core.ec.ECKeyFactory
 
 import java.security.SecureRandom
-
-import static us.eharning.atomun.core.ec.internal.BouncyCastleECKeyConstants.CURVE
 
 /**
  * Tests for the various ECKeyPair implementations.
@@ -131,7 +130,8 @@ class BouncyCastleECKeyPairSpecification extends Specification {
     def "re-imported private keys are equivalent"(boolean isCompressed) {
         given: "a keypair and its imported form"
         ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
-        ECKey importedKeyPair = ECKeyFactory.getInstance().fromSecretExponent(new BigInteger(1, keyPair.exportPrivate()), isCompressed)
+        def secretExponent = ByteStringsKt.toBigInteger(keyPair.exportPrivate(), 1)
+        ECKey importedKeyPair = ECKeyFactory.getInstance().fromSecretExponent(secretExponent, isCompressed)
         expect: "them to be equal"
         EqualsTestUtil.assertEqualsImplementedCorrectly(keyPair, importedKeyPair)
         where:
@@ -171,8 +171,9 @@ class BouncyCastleECKeyPairSpecification extends Specification {
     def "keys generated with altered key material are not equal"(boolean isCompressed) {
         given:
         ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
-        ECKey badImportedKeyPairPublic = ECKeyFactory.getInstance().fromSecretExponent(new BigInteger(1, keyPair.exportPrivate()), new byte[32], isCompressed)
-        ECKey badImportedKeyPairPrivate = ECKeyFactory.getInstance().fromSecretExponent(new BigInteger(1, keyPair.exportPrivate()).add(BigInteger.ONE), keyPair.exportPublic(), isCompressed)
+        def secretExponent = ByteStringsKt.toBigInteger(keyPair.exportPrivate(), 1)
+        ECKey badImportedKeyPairPublic = ECKeyFactory.getInstance().fromSecretExponent(secretExponent, ByteString.of(new byte[32]), isCompressed)
+        ECKey badImportedKeyPairPrivate = ECKeyFactory.getInstance().fromSecretExponent(secretExponent.add(BigInteger.ONE), keyPair.exportPublic(), isCompressed)
         expect: "private with mis-generated private != real private"
         keyPair != badImportedKeyPairPublic
         keyPair != badImportedKeyPairPrivate
@@ -186,7 +187,7 @@ class BouncyCastleECKeyPairSpecification extends Specification {
         given:
         ECKey publicKey = ECKeyFactory.getInstance().generateRandom(isCompressed).public
         expect: "exporting public key works"
-        byte[] exported = publicKey.exportPublic()
+        def exported = publicKey.exportPublic()
         and: "imported public key is the same as the original"
         publicKey == ECKeyFactory.instance.fromEncodedPublicKey(exported, isCompressed)
         where:
@@ -199,8 +200,8 @@ class BouncyCastleECKeyPairSpecification extends Specification {
     def "key can be generated from components"(boolean isCompressed) {
         given:
         ECKey keyPair = ECKeyFactory.getInstance().generateRandom(isCompressed)
-        byte[] exportedPrivateBytes = keyPair.exportPrivate()
-        BigInteger secretExponent = new BigInteger(1, exportedPrivateBytes)
+        def exportedPrivateBytes = keyPair.exportPrivate()
+        def secretExponent = ByteStringsKt.toBigInteger(exportedPrivateBytes, 1)
         ECKey newKeyPair = ECKeyFactory.getInstance().fromSecretExponent(secretExponent, keyPair.exportPublic(), isCompressed)
         expect: "re-retrieved key is also equivalent"
         newKeyPair == keyPair

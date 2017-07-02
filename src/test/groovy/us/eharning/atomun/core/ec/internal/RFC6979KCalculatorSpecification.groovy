@@ -16,6 +16,7 @@
 
 package us.eharning.atomun.core.ec.internal
 
+import okio.ByteStringsKt
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.asn1.x9.X9ECParameters
 import org.bouncycastle.crypto.digests.SHA256Digest
@@ -63,7 +64,7 @@ class RFC6979KCalculatorSpecification extends Specification {
     @Unroll
     def "[#iterationCount] k-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
         ECKey key = testCase.getKey()
-        BigInteger secexp = new BigInteger(1, key.exportPrivate())
+        def secexp = ByteStringsKt.toBigInteger(key.exportPrivate(), 1)
         ECPrivateKeyParameters keyParams = new ECPrivateKeyParameters(secexp, domain)
         given:
         byte[] toSign = testCase.messageHash

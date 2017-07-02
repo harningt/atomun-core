@@ -31,8 +31,8 @@ class RFC6979BouncyCastleECKeyPairSpecification extends Specification {
         given:
         ECKey keyPair = testCase.key
         ECKey publicKey = keyPair.public
-        byte[] toSign = testCase.messageHash
-        byte[] signature = keyPair.ECDSA.withCanonicalize(testCase.canonicalize).sign(toSign);
+        def toSign = testCase.messageHash
+        def signature = keyPair.ECDSA.withCanonicalize(testCase.canonicalize).sign(toSign);
         expect:
 
         publicKey.ECDSA.verify(toSign, signature)

@@ -16,6 +16,7 @@
 
 package us.eharning.atomun.core.ec
 
+import okio.ByteString
 import us.eharning.atomun.core.ValidationException
 import us.eharning.atomun.core.ec.internal.BouncyCastleECKeyPair
 import us.eharning.atomun.core.ec.internal.BouncyCastleECPublicKey
@@ -41,11 +42,11 @@ private constructor() {
     }
 
     @JvmOverloads
-    fun fromSecretExponent(privateExponent: BigInteger, encodedPublicKey: ByteArray? = null, compressed: Boolean): ECKey {
-        return BouncyCastleECKeyPair(privateExponent, encodedPublicKey, compressed)
+    fun fromSecretExponent(privateExponent: BigInteger, encodedPublicKey: ByteString? = null, compressed: Boolean): ECKey {
+        return BouncyCastleECKeyPair.create(privateExponent, encodedPublicKey, compressed)
     }
 
-    fun fromEncodedPublicKey(encodedPublicKey: ByteArray, compressed: Boolean): ECKey {
+    fun fromEncodedPublicKey(encodedPublicKey: ByteString, compressed: Boolean): ECKey {
         return BouncyCastleECPublicKey(encodedPublicKey, compressed)
     }
 
