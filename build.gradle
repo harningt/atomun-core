@@ -34,6 +34,7 @@ dependencies {
     compile 'com.google.code.findbugs:annotations:3.0.1u2'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
 
+    compile 'com.squareup.okio:okio:1.13.0'
     compile 'org.bouncycastle:bcprov-jdk15on:1.57'
 
     testCompile 'org.codehaus.groovy:groovy:2.4.12'
