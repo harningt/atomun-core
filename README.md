@@ -25,8 +25,9 @@ Public APIs not marked with @Beta are considered under the purview of the versio
 > Do not rely on this to exist in the future as it is not "API-frozen".
 > It may change functionality or be removed in any future release.
 
-Public APIs inside the us.eharning.atomun.core.internal namespace are not
-considered 'public' per the versioning rules.
+APIs inside any 'internal' namespace or marked with @Internal
+are not considered for direct public use, nor are considered for
+versioning.
 
 ## License
 
