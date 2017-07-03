@@ -34,7 +34,7 @@ import java.math.BigInteger
  * @return
  *         instance of BigInteger from the contained data.
  */
-fun ByteString.toBigInteger(signum: Int): BigInteger {
+fun ByteString.toBigInteger(signum: Int = 1): BigInteger {
     return this.processInternal {
         BigInteger(signum, it)
     }
