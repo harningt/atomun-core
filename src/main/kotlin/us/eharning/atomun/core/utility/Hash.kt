@@ -40,16 +40,33 @@ object Hash {
     @JvmStatic
     fun keyHash(key: ByteArray): ByteArray {
         val ph = ByteArray(20)
+        keyHash(key, 0, key.size, ph, 0)
+        return ph
+    }
+
+    /**
+     * Perform the double-hash of the encoded public key per Bitcoin rules.
+     *
+     * @param key       byte array to process as input.
+     * @param offset    offset into the byte array.
+     * @param len       number of bytes to process from the byte array.
+     * @param result    byte array to write results to.
+     * @param resultOffset  offset into the result byte array.
+     *
+     * @return length of digest added to buffer.
+     */
+    @JvmStatic
+    fun keyHash(key: ByteArray, offset: Int, len: Int, result: ByteArray, resultOffset: Int): Int {
         try {
-            val sha256 = MessageDigest.getInstance("SHA-256").digest(key)
+            val sha256digest = MessageDigest.getInstance("SHA-256")
+            sha256digest.update(key, offset, len)
+            val sha256 = sha256digest.digest()
             val digest = RIPEMD160Digest()
             digest.update(sha256, 0, sha256.size)
-            digest.doFinal(ph, 0)
+            return digest.doFinal(result, resultOffset)
         } catch (e: NoSuchAlgorithmException) {
-            throw Error("Missing SHA-256", e)
+            throw Error("Missing SHA-256 / failed setup", e)
         }
-
-        return ph
     }
 
     /**
