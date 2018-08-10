@@ -51,7 +51,7 @@ javadoc {
 apply from: "$rootDir/gradle/maven-publish.gradle"
 
 wrapper {
-    gradleVersion = '4.0'
+    gradleVersion = '4.9'
 }
 
 /* Sanity check that the minimum class-set is from Java 7 */
