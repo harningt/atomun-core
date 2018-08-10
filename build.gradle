@@ -1,27 +1,20 @@
-import org.ajoberstar.gradle.git.release.opinion.Strategies
-
 buildscript {
     dependencies {
-        classpath "net.sf.proguard:proguard-gradle:6.0.2"
+        classpath "net.sf.proguard:proguard-gradle:6.0.3"
     }
 }
 
 plugins {
     id 'java'
     id 'groovy'
-    id "org.jetbrains.kotlin.jvm"  version '1.2.41'
+    id "org.jetbrains.kotlin.jvm"  version '1.2.60'
     id 'maven'
-    id 'us.eharning.gradle.defaults' version '0.2.3'
+    id 'us.eharning.gradle.defaults' version '1.0.0'
 }
 
 group = 'us.eharning.atomun'
 description = 'Utility library implementing core support functionality.'
 sourceCompatibility = 1.8
-
-release {
-    // Adds SNAPSHOT strategy to allowed list to be used by Travis-CI
-    versionStrategy Strategies.SNAPSHOT
-}
 
 repositories {
     jcenter()
@@ -34,10 +27,10 @@ dependencies {
     compile 'com.google.code.findbugs:annotations:3.0.1u2'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
 
-    compile 'org.bouncycastle:bcprov-jdk15on:1.59'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
 
-    testCompile 'org.codehaus.groovy:groovy:2.4.14'
-    testCompile 'cglib:cglib-nodep:3.2.6'
+    testCompile 'org.codehaus.groovy:groovy:2.5.1'
+    testCompile 'cglib:cglib-nodep:3.2.7'
     testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
     testCompile 'net.trajano.commons:commons-testing:2.1.0'
     testCompile 'net.trajano.caliper:caliper:1.2.1'
@@ -51,7 +44,7 @@ javadoc {
 apply from: "$rootDir/gradle/maven-publish.gradle"
 
 wrapper {
-    gradleVersion = '4.0'
+    gradleVersion = '4.9'
 }
 
 /* Sanity check that the minimum class-set is from Java 7 */
