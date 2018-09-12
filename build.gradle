@@ -1,4 +1,7 @@
 buildscript {
+    repositories {
+        mavenLocal()
+    }
     dependencies {
         classpath "net.sf.proguard:proguard-gradle:6.0.3"
         classpath "us.eharning.gradle:gradle-defaults:1.1.0"
@@ -19,6 +22,7 @@ description = 'Utility library implementing core support functionality.'
 sourceCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     jcenter()
 }
 
