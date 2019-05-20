@@ -19,6 +19,7 @@ package us.eharning.atomun.core.crypto
 import net.trajano.commons.testing.UtilityClassTestUtil
 import spock.lang.Specification
 import us.eharning.atomun.core.crypto.fakeprovider.FakeProvider
+import us.eharning.atomun.core.crypto.fakeprovider.MacUtility
 
 import javax.crypto.Mac
 import java.security.Provider
@@ -35,8 +36,14 @@ class PBKDF2EdgeCaseSpecification extends Specification {
     def 'PBKDF2 fails horribly if length requirement fails'() {
         given:
         Provider provider = new FakeProvider()
-        Security.addProvider(provider)
-        def mac = Mac.getInstance("HmacNULL")
+        Mac mac
+        /* Check if using JDK9 or higher - which allows custom algorithms through */
+        if (getJavaVersion() >= 9) {
+            Security.addProvider(provider)
+            mac = Mac.getInstance("HmacNULL", provider)
+        } else {
+            mac = MacUtility.getInstance("HmacNULL", provider)
+        }
         byte[] EMPTY_SALT = new byte[0]
         int iterations = 1
         int outputLength = 1
@@ -78,5 +85,20 @@ class PBKDF2EdgeCaseSpecification extends Specification {
         UtilityClassTestUtil.assertUtilityClassWellDefined(PBKDF2.class)
         then:
         noExceptionThrown()
+    }
+
+    /**
+     * Returns the Java version as an int value.
+     * @return the Java version as an int value (8, 9, etc.)
+     */
+    private static int getJavaVersion() {
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.")) {
+            version = version.substring(2);
+        }
+        int dotPos = version.indexOf('.');
+        int dashPos = version.indexOf('-');
+        return Integer.parseInt(version.substring(0,
+                dotPos > -1 ? dotPos : dashPos > -1 ? dashPos : 1));
     }
 }
