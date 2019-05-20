@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2016, 2019 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ public class FakeProvider extends Provider {
     private static final double VERSION = 1.0;
     private static final String INFO = "FakeProvider 1.0";
 
+    // Overriding due to the fact that JDK8 and earlier do not have the string form of Provider ctor
+    @SuppressWarnings("deprecation")
     public FakeProvider() {
         super(NAME, VERSION, INFO);
         put("Mac.HmacNULL", "us.eharning.atomun.core.crypto.fakeprovider.HmacNULL");

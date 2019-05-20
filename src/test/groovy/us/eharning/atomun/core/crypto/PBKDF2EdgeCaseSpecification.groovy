@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2016, 2019 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import us.eharning.atomun.core.crypto.fakeprovider.MacUtility
 
 import javax.crypto.Mac
 import java.security.Provider
+import java.security.Security
 
 /**
  * Unit tests based on PBKDF2 specific limitations.
@@ -35,7 +36,14 @@ class PBKDF2EdgeCaseSpecification extends Specification {
     def 'PBKDF2 fails horribly if length requirement fails'() {
         given:
         Provider provider = new FakeProvider()
-        def mac = MacUtility.getInstance("HmacNULL", provider)
+        Mac mac
+        /* Check if using JDK9 or higher - which allows custom algorithms through */
+        if (getJavaVersion() >= 9) {
+            Security.addProvider(provider)
+            mac = Mac.getInstance("HmacNULL", provider)
+        } else {
+            mac = MacUtility.getInstance("HmacNULL", provider)
+        }
         byte[] EMPTY_SALT = new byte[0]
         int iterations = 1
         int outputLength = 1
@@ -77,5 +85,20 @@ class PBKDF2EdgeCaseSpecification extends Specification {
         UtilityClassTestUtil.assertUtilityClassWellDefined(PBKDF2.class)
         then:
         noExceptionThrown()
+    }
+
+    /**
+     * Returns the Java version as an int value.
+     * @return the Java version as an int value (8, 9, etc.)
+     */
+    private static int getJavaVersion() {
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.")) {
+            version = version.substring(2);
+        }
+        int dotPos = version.indexOf('.');
+        int dashPos = version.indexOf('-');
+        return Integer.parseInt(version.substring(0,
+                dotPos > -1 ? dotPos : dashPos > -1 ? dashPos : 1));
     }
 }
