@@ -60,6 +60,10 @@ configurations.all {
     }
 }
 
+test {
+    jvmArgs('--illegal-access=deny')
+}
+
 javadoc {
     options.tags "todo:a:TODO:"
 }

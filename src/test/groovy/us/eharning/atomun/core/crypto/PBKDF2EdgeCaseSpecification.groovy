@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2016, 2019 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package us.eharning.atomun.core.crypto
 import net.trajano.commons.testing.UtilityClassTestUtil
 import spock.lang.Specification
 import us.eharning.atomun.core.crypto.fakeprovider.FakeProvider
-import us.eharning.atomun.core.crypto.fakeprovider.MacUtility
 
 import javax.crypto.Mac
 import java.security.Provider
+import java.security.Security
 
 /**
  * Unit tests based on PBKDF2 specific limitations.
@@ -35,7 +35,8 @@ class PBKDF2EdgeCaseSpecification extends Specification {
     def 'PBKDF2 fails horribly if length requirement fails'() {
         given:
         Provider provider = new FakeProvider()
-        def mac = MacUtility.getInstance("HmacNULL", provider)
+        Security.addProvider(provider)
+        def mac = Mac.getInstance("HmacNULL")
         byte[] EMPTY_SALT = new byte[0]
         int iterations = 1
         int outputLength = 1
