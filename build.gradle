@@ -45,6 +45,12 @@ dependencies {
 
 configurations.all {
     resolutionStrategy {
+        resolutionStrategy.dependencySubstitution {
+            substitute(module("dom4j:dom4j"))
+                    .because("Use newer dom4j packages")
+                    .with(module("org.dom4j:dom4j:2.1.1"))
+
+        }
         eachDependency { DependencyResolveDetails details ->
             //specifying a fixed version for groovy
             if (details.requested.group == 'org.codehaus.groovy') {
