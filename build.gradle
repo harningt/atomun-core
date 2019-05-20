@@ -1,20 +1,22 @@
 buildscript {
+    ext.kotlin_version = "1.3.31"
     repositories {
         mavenLocal()
     }
     dependencies {
         classpath "net.sf.proguard:proguard-gradle:6.0.3"
         classpath "us.eharning.gradle:gradle-defaults:1.1.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
     id 'java'
     id 'groovy'
-    id "org.jetbrains.kotlin.jvm"  version '1.2.60'
     id 'maven'
 }
 
+apply plugin: 'kotlin'
 apply plugin: 'us.eharning.gradle.defaults'
 
 group = 'us.eharning.atomun'
@@ -33,14 +35,29 @@ dependencies {
     compile 'com.google.code.findbugs:annotations:3.0.1u2'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
 
-    compile 'org.bouncycastle:bcprov-jdk15on:1.60'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.61'
 
-    testCompile 'org.codehaus.groovy:groovy:2.5.1'
-    testCompile 'cglib:cglib-nodep:3.2.7'
-    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    testCompile 'org.codehaus.groovy:groovy:2.5.7'
+    testCompile 'org.spockframework:spock-core:1.3-groovy-2.5'
     testCompile 'net.trajano.commons:commons-testing:2.1.0'
-    testCompile 'net.trajano.caliper:caliper:1.2.1'
-    testCompile 'org.yaml:snakeyaml:1.21'
+    testCompile 'org.yaml:snakeyaml:1.24'
+}
+
+configurations.all {
+    resolutionStrategy {
+        resolutionStrategy.dependencySubstitution {
+            substitute(module("dom4j:dom4j"))
+                    .because("Use newer dom4j packages")
+                    .with(module("org.dom4j:dom4j:2.1.1"))
+
+        }
+        eachDependency { DependencyResolveDetails details ->
+            //specifying a fixed version for groovy
+            if (details.requested.group == 'org.codehaus.groovy') {
+                details.useVersion '2.5.7'
+            }
+        }
+    }
 }
 
 javadoc {
@@ -50,7 +67,7 @@ javadoc {
 apply from: "$rootDir/gradle/maven-publish.gradle"
 
 wrapper {
-    gradleVersion = '4.9'
+    gradleVersion = '5.4.1'
 }
 
 /* Sanity check that the minimum class-set is from Java 7 */
