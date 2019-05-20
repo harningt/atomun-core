@@ -2,9 +2,9 @@
 
 [![License](http://img.shields.io/badge/license-Apache_2-red.svg)][Apache2.0]
 
-[![Build Status](https://travis-ci.org/harningt/atomun-core.svg?branch=develop)](https://travis-ci.org/harningt/atomun-core)
+DEVELOP [![Build Status](https://travis-ci.org/harningt/atomun-core.svg?branch=develop)](https://travis-ci.org/harningt/atomun-core) [![codecov.io](https://codecov.io/github/harningt/atomun-core/coverage.svg?branch=develop)](https://codecov.io/github/harningt/atomun-core?branch=develop)
 
-[![codecov.io](https://codecov.io/github/harningt/atomun-core/coverage.svg?branch=develop)](https://codecov.io/github/harningt/atomun-core?branch=develop)
+MASTER [![Build Status](https://travis-ci.org/harningt/atomun-core.svg?branch=master)](https://travis-ci.org/harningt/atomun-core) [![codecov.io](https://codecov.io/github/harningt/atomun-core/coverage.svg?branch=master)](https://codecov.io/github/harningt/atomun-core?branch=master)
 
 Enter [Atomun](https://github.com/harningt/atomun) - the Java Bitcoin utility library collection.
 
@@ -38,7 +38,7 @@ The repository is managed using the Gitflow workflow. Note that any published
 feature/* branches are subject to history modification, so beware working
 off of those.
 
-Non-annotated tags will be added in the form vMAJOR.MINOR.MICRO-dev to denote the
+Non-annotated tags will be added in the form vMAJOR.MINOR.MICRO-DEV to denote the
 start of a new feature. This will guide the next release to be versioned as
 vMAJOR.MINOR.MICRO. Without this, the next expected version would be a MICRO-change.
 
@@ -62,7 +62,7 @@ Signed release artifacts will be pushed directly to Maven Central.
 Releases will be signed by the following privately held GPG key. It doesn't
 get published to Travis-CI.
 
-    pub   2048R/F8908096 2014-10-29 [expires: 2016-10-28]
+    pub   2048R/F8908096 2014-10-29
           Key fingerprint = B6CC 560D F1C0 991E 08AA  555A ED63 F369 F890 8096
     uid                  Thomas Harning Jr (CODE SIGNING KEY) <harningt@gmail.com>
 
@@ -74,7 +74,7 @@ Snapshots will be signed by a key held by Travis-CI in their encrypted
 data stores. I figured it would be better to sign the snapshots than not
 have them signed at all, even if the specific key is less protected.
 
-    pub   2048R/EF39E8D8 2015-03-10 [expires: 2016-03-09]
+    pub   2048R/EF39E8D8 2015-03-10
           Key fingerprint = FCA2 D4CC 9294 38B7 5B91  8D9E 6BF2 A2D1 EF39 E8D8
     uid                  Thomas Harning Jr (AUTOMATED CI CODESIGNER) <harningt@gmail.com>
 
@@ -93,7 +93,8 @@ Tags will be signed by the following privately held hardware-based GPG key.
 
 ### Runtime
 
- * Guava 19.0
+ * Kotlin
+ * Bouncycastle
 
 ### Test
 
@@ -103,8 +104,6 @@ Tags will be signed by the following privately held hardware-based GPG key.
 ### Quality
 
  * FindBugs
- * org.ajoberstar gradle defaults
-    * many included things, such as license plugin
 
 # Acknowledgements
 

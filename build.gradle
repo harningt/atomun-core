@@ -1,83 +1,70 @@
-import org.ajoberstar.gradle.git.release.opinion.Strategies
+buildscript {
+    ext.kotlin_version = "1.3.31"
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        classpath "net.sf.proguard:proguard-gradle:6.0.3"
+        classpath "us.eharning.gradle:gradle-defaults:1.1.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
 
 plugins {
     id 'java'
     id 'groovy'
     id 'maven'
-    id 'org.ajoberstar.release-opinion' version '1.3.0'
-    id 'org.ajoberstar.defaults' version '0.5.2'
-    id "org.standardout.versioneye" version "1.1.1"
-    id 'checkstyle'
-    id 'findbugs'
 }
+
+apply plugin: 'kotlin'
+apply plugin: 'us.eharning.gradle.defaults'
 
 group = 'us.eharning.atomun'
 description = 'Utility library implementing core support functionality.'
-sourceCompatibility = 1.7
-
-defaults {
-    id = 'harningt'
-
-    developers = [
-            [id: 'harningt', name: 'Thomas Harning Jr', email: 'harningt@gmail.com']
-    ]
-
-    // used by license plugin
-    copyrightYears = '2015'
-}
-
-license {
-    skipExistingHeaders true
-}
-
-release {
-    // Adds SNAPSHOT strategy to allowed list to be used by Travis-CI
-    versionStrategy Strategies.SNAPSHOT
-}
+sourceCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     jcenter()
-    mavenCentral()
 }
 
 dependencies {
     findbugs 'com.google.code.findbugs:findbugs:3.0.1'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    compile group: 'com.google.guava', name: 'guava', version: '19.0'
-    compile 'com.google.code.findbugs:annotations:3.0.1'
-    compile 'com.google.code.findbugs:jsr305:3.0.1'
+    compile 'com.google.code.findbugs:annotations:3.0.1u2'
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
 
-    compile 'org.bouncycastle:bcprov-jdk15on:1.54'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.61'
 
-    testCompile 'org.codehaus.groovy:groovy:2.4.5'
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-    testCompile 'net.trajano.caliper:caliper:1.2.1'
-    testCompile 'org.yaml:snakeyaml:1.16'
+    testCompile 'org.codehaus.groovy:groovy:2.5.7'
+    testCompile 'org.spockframework:spock-core:1.3-groovy-2.5'
+    testCompile 'net.trajano.commons:commons-testing:2.1.0'
+    testCompile 'org.yaml:snakeyaml:1.24'
 }
 
-checkstyle {
-    /* Using checkstyle 6.15 as that is the maximum for the IntelliJ extensions */
-    toolVersion = '6.15'
-    configFile = new File(rootDir, 'gradle/checkstyle/checkstyle.xml')
-}
+configurations.all {
+    resolutionStrategy {
+        resolutionStrategy.dependencySubstitution {
+            substitute(module("dom4j:dom4j"))
+                    .because("Use newer dom4j packages")
+                    .with(module("org.dom4j:dom4j:2.1.1"))
 
-jacoco {
-    toolVersion = '0.7.5.201505241946'
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        html.destination "${buildDir}/jacocoHtml"
+        }
+        eachDependency { DependencyResolveDetails details ->
+            //specifying a fixed version for groovy
+            if (details.requested.group == 'org.codehaus.groovy') {
+                details.useVersion '2.5.7'
+            }
+        }
     }
 }
 
-sonarRunner {
-    toolVersion = '2.4'
-}
-
-findbugs {
-    sourceSets = [ sourceSets.main ]
+test {
+    /* If in JDK 9 or higher, must mark illegal-access as denied */
+    if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
+        jvmArgs('--illegal-access=deny')
+    }
 }
 
 javadoc {
@@ -87,5 +74,22 @@ javadoc {
 apply from: "$rootDir/gradle/maven-publish.gradle"
 
 wrapper {
-    gradleVersion = '2.10'
+    gradleVersion = '5.4.1'
+}
+
+/* Sanity check that the minimum class-set is from Java 7 */
+task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: assemble) {
+    injars project.jar.archivePath
+    libraryjars files(System.getenv("JAVA7_HOME") + "/jre/lib/rt.jar")
+    libraryjars files(System.getenv("JAVA7_HOME") + "/jre/lib/jce.jar")
+    libraryjars files(configurations.compile)
+    // Don't really try to do anything, we just want this tool for it's bytecode lint
+    dontshrink
+    dontobfuscate
+    dontoptimize
+    // Don't fail if LambdaMetafactory is missing - it would be handled by Retrolambda
+    dontwarn 'java.lang.invoke.LambdaMetafactory'
+    // Don't note that these are duplicately imported, different test tools pull in
+    dontnote 'javax.annotation.**'
+    dontnote 'net.jcip.annotations.**'
 }

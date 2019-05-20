@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Thomas Harning Jr. <harningt@gmail.com>
+ * Copyright 2015, 2016 Thomas Harning Jr. <harningt@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,38 @@ import us.eharning.atomun.core.ec.ECKey
 import us.eharning.atomun.core.ec.RFC6979TestData
 import us.eharning.atomun.core.ec.RFC6979TestData.TestCase
 
+import java.security.SecureRandom
+
 /**
  * Tests for the various RFC6979 K Calculator implementations.
  */
 class RFC6979KCalculatorSpecification extends Specification {
     protected static final X9ECParameters curve = SECNamedCurves.getByName("secp256k1");
     protected static final ECDomainParameters domain = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
+
+    def "k-generation does not support SecureRandom being passed in"() {
+        given:
+        BigInteger n = BigInteger.TEN
+        RFC6979KCalculator calc = new RFC6979KCalculator(new SHA256Digest());
+        when:
+        calc.init(n, new SecureRandom())
+        then:
+        thrown(IllegalStateException)
+    }
+
+    def "k-generation repeats if it would be zero in the iteration loop"() {
+        given: "constants that have been found to result in the first pass generating zero"
+        BigInteger q = new BigInteger(1, "06".decodeHex())
+        BigInteger x = new BigInteger(1, "0A".decodeHex())
+        byte[] hash = "AF2BDBE1AA9B6EC1E2ADE1D694F41FC71A831D0268E9891562113D8A62ADD1BF".decodeHex()
+        BigInteger expected = new BigInteger(1, "01".decodeHex())
+        RFC6979KCalculator calc = new RFC6979KCalculator(new SHA256Digest());
+        calc.init(q, x, hash)
+        BigInteger nextK = calc.nextK();
+
+        expect:
+        nextK == expected
+    }
 
     @Unroll
     def "[#iterationCount] k-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
