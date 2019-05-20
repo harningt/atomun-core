@@ -61,7 +61,10 @@ configurations.all {
 }
 
 test {
-    jvmArgs('--illegal-access=deny')
+    /* If in JDK 9 or higher, must mark illegal-access as denied */
+    if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
+        jvmArgs('--illegal-access=deny')
+    }
 }
 
 javadoc {
