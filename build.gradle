@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath "net.sf.proguard:proguard-gradle:6.0.3"
-        classpath "us.eharning.gradle:gradle-defaults:1.1.0"
+        classpath "us.eharning.gradle:gradle-defaults:2.1.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -28,11 +28,15 @@ repositories {
     jcenter()
 }
 
+spotbugs {
+    toolVersion = '4.0.0-beta1'
+}
+
 dependencies {
-    findbugs 'com.google.code.findbugs:findbugs:3.0.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    compile 'com.google.code.findbugs:annotations:3.0.1u2'
+    compile 'net.jcip:jcip-annotations:1.0'
+    compile 'com.github.spotbugs:spotbugs-annotations:4.0.0-beta1'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
 
     compile 'org.bouncycastle:bcprov-jdk15on:1.61'
