@@ -96,4 +96,5 @@ task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: assemble) {
     // Don't note that these are duplicately imported, different test tools pull in
     dontnote 'javax.annotation.**'
     dontnote 'net.jcip.annotations.**'
+    dontwarn 'module-info'
 }
