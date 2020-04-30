@@ -51,7 +51,7 @@ configurations.all {
         resolutionStrategy.dependencySubstitution {
             substitute(module("dom4j:dom4j"))
                     .because("Use newer dom4j packages")
-                    .with(module("org.dom4j:dom4j:2.1.1"))
+                    .with(module("org.dom4j:dom4j:2.1.3"))
 
         }
         eachDependency { DependencyResolveDetails details ->
