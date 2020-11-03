@@ -61,7 +61,7 @@ class RFC6979KCalculatorSpecification extends Specification {
     }
 
     @Unroll
-    def "[#iterationCount] k-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
+    def "[#iterationIndex] k-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
         ECKey key = testCase.getKey()
         BigInteger secexp = new BigInteger(1, key.exportPrivate())
         ECPrivateKeyParameters keyParams = new ECPrivateKeyParameters(secexp, domain)
