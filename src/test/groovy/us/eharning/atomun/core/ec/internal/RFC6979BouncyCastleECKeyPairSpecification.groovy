@@ -27,7 +27,7 @@ import us.eharning.atomun.core.ec.RFC6979TestData.TestCase
  */
 class RFC6979BouncyCastleECKeyPairSpecification extends Specification {
     @Unroll
-    def "[#iterationCount] signature-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
+    def "[#iterationIndex] signature-generation passes #testCase.source => #testCase.description"(TestCase testCase) {
         given:
         ECKey keyPair = testCase.key
         ECKey publicKey = keyPair.public
